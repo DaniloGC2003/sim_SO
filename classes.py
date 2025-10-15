@@ -1,6 +1,8 @@
 
 class OS_Simulator:
     def __init__(self):
+        self.algorithm = ""
+        self.quantum = 0
         self.tasks = []
     
 class Task:

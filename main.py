@@ -15,7 +15,8 @@ label.pack(pady=20)
 icon = tk.PhotoImage(file="images/logo.png")
 window.iconphoto(False, icon)
 
-button = tk.Button(window, text="Upload config file", font=("Arial", 14), bg="#51634d", fg="white", command=fu.upload_file)
+button = tk.Button(window, text="Upload config file", font=("Arial", 14), bg="#51634d", fg="white", 
+                   command=lambda: fu.upload_file(simulator))
 button.pack(pady=20)
 
 window.mainloop()
