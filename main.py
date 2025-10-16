@@ -1,23 +1,85 @@
 import tkinter as tk
+from tkinter import ttk
 import file_upload as fu
 import classes as cl
 
 simulator = cl.OS_Simulator()
 
-window = tk.Tk()
-window.geometry("600x600")
-window.title("Simulador de SO")
-window.config(background="#95b88d")
+root = tk.Tk()
+root.title("OS simulator")
+root.minsize(768, 432)
+root.config(background="#95b88d")
 
-label = tk.Label(window, text="Simulador de SO", font=("Arial", 24), bg="#95b88d")
-label.pack(pady=20)
+image = tk.PhotoImage(file="images/logo.png")
 
-icon = tk.PhotoImage(file="images/logo.png")
-window.iconphoto(False, icon)
+# Tools frame
+tools_frame = tk.Frame(root, bg="skyblue")
+tools_frame.pack(padx=5, pady=5, side=tk.LEFT, fill=tk.Y) 
 
-button = tk.Button(window, text="Upload config file", font=("Arial", 14), bg="#51634d", fg="white", 
-                   command=lambda: fu.upload_file(simulator))
-button.pack(pady=20)
+tk.Label(
+    tools_frame,
+    text="RECEBA",
+    bg="skyblue",
+).pack(padx=5, pady=5)
 
-window.mainloop()
+thumbnail_image = image.subsample(5, 5)
+tk.Label(tools_frame, image=thumbnail_image).pack(padx=5, pady=5)
+
+path_label = tk.Label(tools_frame, text=".txt config file inside config_files folder:", bg="skyblue")
+path_label.pack(padx=5)
+path_textbox = tk.Text(tools_frame, height=1, width=30)
+path_textbox.insert(tk.END, "ex1")
+path_textbox.pack(padx=10, pady=10)
+
+upload_button = tk.Button(tools_frame, text="Upload config file", 
+                          command=lambda: fu.upload_file(simulator, path_textbox.get("1.0", tk.END).strip()))
+upload_button.pack(padx=5, pady=5)
+
+# Tools and Filters tabs
+notebook = ttk.Notebook(tools_frame)
+notebook.pack(expand=True, fill="both")
+
+tools_tab = tk.Frame(notebook, bg="lightblue")
+tools_var = tk.StringVar(value="None")
+
+for tool in ["Resizing", "Rotating"]:
+    tk.Radiobutton(
+        tools_tab,
+        text=tool,
+        variable=tools_var,
+        value=tool,
+        bg="lightblue",
+    ).pack(anchor="w", padx=20, pady=5)
+
+filters_tab = tk.Frame(notebook, bg="lightgreen")
+filters_var = tk.StringVar(value="None")
+
+for filter in ["Blurring", "Sharpening"]:
+    tk.Radiobutton(
+        filters_tab,
+        text=filter,
+        variable=filters_var,
+        value=filter,
+        bg="lightgreen",
+    ).pack(anchor="w", padx=20, pady=5)
+
+notebook.add(tools_tab, text="Tools")
+notebook.add(filters_tab, text="Filters")
+
+# Image frame
+image_frame = tk.Frame(root, bg="grey")
+image_frame.pack(padx=5, pady=5, side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+display_image = image.subsample(2, 2)
+
+tk.Label(
+    image_frame,
+    text="Image",
+    bg="grey",
+    fg="white",
+).pack(padx=5, pady=5)
+
+tk.Label(image_frame, image=display_image).pack(padx=5, pady=5)
+
+root.mainloop()
 print("terminating program")

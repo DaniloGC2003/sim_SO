@@ -1,8 +1,8 @@
 import classes as cl
 
-def upload_file(os_simulator):
+def upload_file(os_simulator, filename):
     print("File upload function called")
-    string = "config_files/ex1.txt"
+    string = "config_files/" + filename + ".txt"
     with open(string, 'r') as file:
         lines = file.readlines()
 
