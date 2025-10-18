@@ -1,6 +1,11 @@
 import classes as cl
+import tkinter as tk
+from tkinter import filedialog
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-def upload_file(os_simulator, filename):
+def upload_file(os_simulator, filename, window):
     print("File upload function called")
     string = "config_files/" + filename + ".txt"
     with open(string, 'r') as file:
@@ -25,3 +30,8 @@ def upload_file(os_simulator, filename):
         
         task = cl.Task(name, color, start, duration, priority, event_list)
         os_simulator.tasks.append(task)
+
+    os_simulator.fig, os_simulator.ax = plt.subplots()
+    os_simulator.canvas = FigureCanvasTkAgg(os_simulator.fig, master=window)
+    os_simulator.widget = os_simulator.canvas.get_tk_widget()
+    os_simulator.widget.pack(padx=10, pady=10)
