@@ -13,3 +13,15 @@ def upload_file(os_simulator, filename):
     print(lines)
     os_simulator.algorithm = os_config[0]
     os_simulator.quantum = int(os_config[1])
+
+    for line in lines[1:]:
+        task_info = line.split(";")
+        name = task_info[0]
+        color = task_info[1]
+        start = int(task_info[2])
+        duration = int(task_info[3])
+        priority = int(task_info[4])
+        event_list = task_info[5].split(",") if task_info[5] != '-' else []
+        
+        task = cl.Task(name, color, start, duration, priority, event_list)
+        os_simulator.tasks.append(task)

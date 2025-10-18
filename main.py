@@ -3,6 +3,7 @@ from tkinter import ttk
 import file_upload as fu
 import classes as cl
 
+
 simulator = cl.OS_Simulator()
 
 root = tk.Tk()
@@ -83,3 +84,4 @@ tk.Label(image_frame, image=display_image).pack(padx=5, pady=5)
 
 root.mainloop()
 print("terminating program")
+simulator.print_self()
