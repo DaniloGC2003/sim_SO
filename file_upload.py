@@ -31,6 +31,7 @@ def upload_file(os_simulator, filename, window):
         task = cl.Task(name, color, start, duration, priority, event_list)
         os_simulator.tasks.append(task)
 
+    #plot initial chart
     os_simulator.fig, os_simulator.ax = plt.subplots()
     os_simulator.canvas = FigureCanvasTkAgg(os_simulator.fig, master=window)
     os_simulator.widget = os_simulator.canvas.get_tk_widget()
