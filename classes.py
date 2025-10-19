@@ -8,11 +8,65 @@ import queue as q
 
 X_AXIS_MIN_LENGTH = 15
 
+class Scheduler:
+    def __init__(self, algorithm):
+        self.algorithm = algorithm
+        self.current_task = None
+
+        # Variables for FCFS algorithm
+        self.execution_queue = q.Queue()
+
+    def exec(self, tasks, current_time):
+        if self.algorithm == "FCFS":
+            self.current_task = self.step_FCFS(tasks, current_time)
+        return self.current_task
+    
+    def step_FCFS(self, tasks, current_time):
+        # Enqueue tasks starting at current_time
+
+        # List to store tasks starting at current_time
+        new_tasks = []
+        for task in tasks:
+            if task.start == current_time:
+                new_tasks.append(task)
+        # Enqueue tasks in ascending order of their indexes
+        while len(new_tasks) > 0:
+            earliest = None
+            for task in new_tasks:
+                if earliest is None:
+                    earliest = task
+                else:
+                    if int(task.name[1:]) < int(earliest.name[1:]):
+                        earliest = task
+            new_tasks.remove(earliest)
+            print("enqueuing task: " + earliest.name)
+            self.execution_queue.put(earliest)
+        
+        # Find current task
+        if not self.execution_queue.empty():
+            self.current_task = self.execution_queue.queue[0]
+        else:
+            self.current_task = None
+        if self.current_task is not None:
+            # Se clock tick for o ultimo necessario para completar a duracao da tarefa
+            if len(self.current_task.moments_in_execution) == self.current_task.duration - 1:
+                # Dequeue
+                finished_task = self.execution_queue.get()
+
+                print("finished task: " + finished_task.name)
+                finished_task.end = current_time + 1
+        print("FCFS selected")
+
+        print('returning: ' + self.current_task.name if self.current_task else "returning None")
+        return self.current_task
+
+
 class OS_Simulator:
     def __init__(self):
         self.algorithm = ""
         self.quantum = 0
         self.tasks = []
+        self.scheduler = None
 
         # Variables used for plotting the chart
         self.fig = None
@@ -34,50 +88,18 @@ class OS_Simulator:
         for task in self.tasks:
             print(f"Task: {task.name}, Color: {task.color}, Start: {task.start}, Duration: {task.duration}, Priority: {task.priority}, Events: {task.event_list}")
 
-    def step_FCFS(self):
-        # Enqueue tasks starting at current_time
 
-        # List to store tasks starting at current_time
-        early_list = []
-        for task in self.tasks:
-            if task.start == self.current_time:
-                early_list.append(task)
-        # Enqueue tasks in ascending order of their indexes
-        while len(early_list) > 0:
-            earliest = None
-            for task in early_list:
-                if earliest is None:
-                    earliest = task
-                else:
-                    if int(task.name[1:]) < int(earliest.name[1:]):
-                        earliest = task
-            early_list.remove(earliest)
-            print("enqueuing task: " + earliest.name)
-            self.execution_queue.put(earliest)
-        
-        # Find current task
-        if not self.execution_queue.empty():
-            self.current_task = self.execution_queue.queue[0]
-        else:
-            self.current_task = None
-
-        # Execute current task
-        if self.current_task is not None:
-            print("current task: " + self.current_task.name)
-            self.current_task.moments_in_execution.append(self.current_time)
-            if len(self.current_task.moments_in_execution) >= self.current_task.duration:
-                finished_task = self.execution_queue.get()
-                print("finished task: " + finished_task.name)
-                finished_task.end = self.current_time + 1
-        print("FCFS selected")
-
+    def update_chart(self):
+        next_task = None
+        if self.algorithm == "FCFS":
+            next_task = self.scheduler.exec(self.tasks, self.current_time)
+        if next_task is not None:    
+            print("im here")
+            next_task.moments_in_execution.append(self.current_time)
         # increment time
         if self.current_time < self.total_simulation_time:
             self.current_time += 1
-
-    def update_chart(self):
-        if self.algorithm == "FCFS":
-            self.step_FCFS()
+    
         # plot chart
         self.ax.clear()
         self.ax.set_xlim(0, max(X_AXIS_MIN_LENGTH, self.current_time + 1))
@@ -98,6 +120,8 @@ class OS_Simulator:
         if self.current_time >= self.total_simulation_time:
             print("Simulation finished. Saving image")
             self.fig.savefig("image_output/output.png")
+        
+        print()
 
 class Task:
     def __init__(self, name, color, start, duration, priority, event_list):

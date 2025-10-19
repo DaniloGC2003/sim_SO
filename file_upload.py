@@ -34,6 +34,9 @@ def upload_file(os_simulator, filename, window):
         task = cl.Task(name, color, start, duration, priority, event_list)
         os_simulator.tasks.append(task)
         os_simulator.total_simulation_time += duration
+    
+    if os_simulator.algorithm == "FCFS":
+        os_simulator.scheduler = cl.Scheduler("FCFS")
 
     #plot initial chart
     os_simulator.fig, os_simulator.ax = plt.subplots(figsize=(8,4))
