@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import queue as q
 
+X_AXIS_MIN_LENGTH = 15
+
 class OS_Simulator:
     def __init__(self):
         self.algorithm = ""
@@ -22,6 +24,7 @@ class OS_Simulator:
         # Variables used for the simulation
         self.current_time = 0
         self.current_task = None
+        self.total_simulation_time = 0
 
         # Variables for FCFS algorithm
         self.execution_queue = q.Queue()
@@ -59,6 +62,7 @@ class OS_Simulator:
             # Find current task
             if not self.execution_queue.empty():
                 self.current_task = self.execution_queue.queue[0]
+                #print("current task: " + self.current_task.name)
             else:
                 self.current_task = None
 
@@ -69,16 +73,31 @@ class OS_Simulator:
                 if len(self.current_task.moments_in_execution) >= self.current_task.duration:
                     finished_task = self.execution_queue.get()
                     print("finished task: " + finished_task.name)
-
-
-            self.ax.clear()
-            for task in self.tasks:
-                for moment in task.moments_in_execution:
-                    self.ax.barh(task.name, 1, left=moment, color=task.color, edgecolor="black")
-            #self.fig = plt.barh([task.name for task in self.tasks], [task.duration for task in self.tasks], left=[task.start for task in self.tasks], color=[task.color for task in self.tasks], edgecolor="black")
-            self.canvas.draw()
-            self.current_time += 1
+                    finished_task.end = self.current_time + 1
             print("FCFS selected")
+
+            # increment time
+            if self.current_time < self.total_simulation_time:
+                self.current_time += 1
+
+        # plot chart
+        self.ax.clear()
+        self.ax.set_xlim(0, max(X_AXIS_MIN_LENGTH, self.current_time + 1))
+        self.ax.set_xticks(range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1))
+        for x in range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1):
+            self.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
+        for task in self.tasks:
+            print("plotting task: " + task.name)
+            self.ax.barh(task.name, 0, left=0)
+            for i in range(self.current_time):
+                if i in task.moments_in_execution:
+                    print("plotting colored")
+                    self.ax.barh(task.name, 1, left=i, color=task.color, edgecolor="black")
+                elif i >= task.start and i < task.end:
+                    self.ax.barh(task.name, 1, left=i, color="white", edgecolor="black")
+            
+        #self.fig = plt.barh([task.name for task in self.tasks], [task.duration for task in self.tasks], left=[task.start for task in self.tasks], color=[task.color for task in self.tasks], edgecolor="black")
+        self.canvas.draw()
 
 class Task:
     def __init__(self, name, color, start, duration, priority, event_list):
@@ -90,3 +109,4 @@ class Task:
         self.event_list = event_list
 
         self.moments_in_execution = []
+        self.end = float('inf')

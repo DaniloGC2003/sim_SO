@@ -1,3 +1,5 @@
+# this is an experimental workspace. Not part of the main program. Should be deleted soon
+
 import matplotlib.pyplot as plt
 
 t1name = "t1"
@@ -27,3 +29,4 @@ ax.set_xlim(0, 12)
 ax.set_title("Gantt Chart Example")
 
 plt.show()
+

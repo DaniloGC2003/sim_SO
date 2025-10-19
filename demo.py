@@ -1,3 +1,4 @@
+# this is an experimental workspace. Not part of the main program. Should be deleted soon
 import classes as cl
 import tkinter as tk
 from tkinter import filedialog

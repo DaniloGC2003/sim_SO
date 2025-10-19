@@ -5,6 +5,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+X_AXIS_MIN_LENGTH = 15
+
+
 def upload_file(os_simulator, filename, window):
     print("File upload function called")
     string = "config_files/" + filename + ".txt"
@@ -30,9 +33,14 @@ def upload_file(os_simulator, filename, window):
         
         task = cl.Task(name, color, start, duration, priority, event_list)
         os_simulator.tasks.append(task)
+        os_simulator.total_simulation_time += duration
 
     #plot initial chart
-    os_simulator.fig, os_simulator.ax = plt.subplots()
+    os_simulator.fig, os_simulator.ax = plt.subplots(figsize=(8,4))
+    os_simulator.ax.set_xlim(0, X_AXIS_MIN_LENGTH)
+    os_simulator.ax.set_xticks(range(int(os_simulator.ax.get_xlim()[0]), int(os_simulator.ax.get_xlim()[1]) + 1))
+    for x in range(int(os_simulator.ax.get_xlim()[0]), int(os_simulator.ax.get_xlim()[1]) + 1):
+        os_simulator.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
     os_simulator.canvas = FigureCanvasTkAgg(os_simulator.fig, master=window)
     os_simulator.widget = os_simulator.canvas.get_tk_widget()
     os_simulator.widget.pack(padx=10, pady=10)
