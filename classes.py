@@ -56,7 +56,28 @@ class OS_Simulator:
                 print("enqueuing task: " + earliest.name)
                 self.execution_queue.put(earliest)
             
-            
+            # Find current task
+            if not self.execution_queue.empty():
+                self.current_task = self.execution_queue.queue[0]
+            else:
+                self.current_task = None
+
+            # Execute current task
+            if self.current_task is not None:
+                print("current task: " + self.current_task.name)
+                self.current_task.moments_in_execution.append(self.current_time)
+                if len(self.current_task.moments_in_execution) >= self.current_task.duration:
+                    finished_task = self.execution_queue.get()
+                    print("finished task: " + finished_task.name)
+
+
+            self.ax.clear()
+            for task in self.tasks:
+                for moment in task.moments_in_execution:
+                    self.ax.barh(task.name, 1, left=moment, color=task.color, edgecolor="black")
+            #self.fig = plt.barh([task.name for task in self.tasks], [task.duration for task in self.tasks], left=[task.start for task in self.tasks], color=[task.color for task in self.tasks], edgecolor="black")
+            self.canvas.draw()
+            self.current_time += 1
             print("FCFS selected")
 
 class Task:
@@ -67,3 +88,5 @@ class Task:
         self.duration = duration
         self.priority = priority
         self.event_list = event_list
+
+        self.moments_in_execution = []
