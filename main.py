@@ -94,8 +94,10 @@ tk.Label(
 
 tk.Label(image_frame, image=display_image).pack(padx=5, pady=5)
 
-#make sure the program is terminated after closing the window
+# Make sure the program is terminated after closing the window
 root.protocol("WM_DELETE_WINDOW", on_close)
+
+# Initialize GUI
 root.mainloop()
-print("terminating program")
-simulator.print_self()
+
+print("Terminating program")

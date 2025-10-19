@@ -41,6 +41,8 @@ def upload_file(os_simulator, filename, window):
     os_simulator.ax.set_xticks(range(int(os_simulator.ax.get_xlim()[0]), int(os_simulator.ax.get_xlim()[1]) + 1))
     for x in range(int(os_simulator.ax.get_xlim()[0]), int(os_simulator.ax.get_xlim()[1]) + 1):
         os_simulator.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
+    for task in os_simulator.tasks:
+        os_simulator.ax.barh(task.name, 0, left=0)
     os_simulator.canvas = FigureCanvasTkAgg(os_simulator.fig, master=window)
     os_simulator.widget = os_simulator.canvas.get_tk_widget()
     os_simulator.widget.pack(padx=10, pady=10)
