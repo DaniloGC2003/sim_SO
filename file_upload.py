@@ -8,7 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 X_AXIS_MIN_LENGTH = 15
 
 
-def upload_file(os_simulator, filename, window):
+def upload_file(os_simulator, filename, window, chart_button):
     print("File upload function called")
     string = "config_files/" + filename + ".txt"
     with open(string, 'r') as file:
@@ -35,6 +35,13 @@ def upload_file(os_simulator, filename, window):
         os_simulator.tasks.append(task)
         os_simulator.total_simulation_time += duration
     
+
+    earliest_start = None
+    for task in os_simulator.tasks:
+        if earliest_start is None or task.start < earliest_start.start:
+            earliest_start = task
+    os_simulator.total_simulation_time += earliest_start.start
+    
     if os_simulator.algorithm == "FCFS":
         os_simulator.scheduler = cl.Scheduler("FCFS")
 
@@ -49,3 +56,5 @@ def upload_file(os_simulator, filename, window):
     os_simulator.canvas = FigureCanvasTkAgg(os_simulator.fig, master=window)
     os_simulator.widget = os_simulator.canvas.get_tk_widget()
     os_simulator.widget.pack(padx=10, pady=10)
+
+    chart_button.pack(padx = 5, pady = 5)

@@ -39,14 +39,14 @@ path_label = tk.Label(tools_frame, text=".txt config file inside config_files fo
 path_label.pack(padx=5)
 path_textbox = tk.Text(tools_frame, height=1, width=30)
 path_textbox.insert(tk.END, "ex1")
-path_textbox.pack(padx=10, pady=10)
+path_textbox.pack(padx=10, pady=10) 
 
 upload_button = tk.Button(tools_frame, text="Upload config file", 
-                          command=lambda: fu.upload_file(simulator, path_textbox.get("1.0", tk.END).strip(), image_frame))
+                          command=lambda: fu.upload_file(simulator, path_textbox.get("1.0", tk.END).strip(), image_frame, update_chart_button))
 upload_button.pack(padx=5, pady=5)
 update_chart_button = tk.Button(tools_frame, text = "Update chart", 
                                 command=lambda: simulator.update_chart())
-update_chart_button.pack(padx = 5, pady = 5)
+#update_chart_button.pack(padx = 5, pady = 5)
 
 # Tools and Filters tabs
 notebook = ttk.Notebook(tools_frame)

@@ -16,12 +16,12 @@ class Scheduler:
         # Variables for FCFS algorithm
         self.execution_queue = q.Queue()
 
-    def exec(self, tasks, current_time):
+    def exec(self, tasks, current_time, finished_tasks):
         if self.algorithm == "FCFS":
-            self.current_task = self.step_FCFS(tasks, current_time)
+            self.current_task = self.step_FCFS(tasks, current_time, finished_tasks)
         return self.current_task
-    
-    def step_FCFS(self, tasks, current_time):
+    # Step functions should return the task to be executed and check for task completion
+    def step_FCFS(self, tasks, current_time, finished_tasks):
         # Enqueue tasks starting at current_time
 
         # List to store tasks starting at current_time
@@ -42,19 +42,27 @@ class Scheduler:
             print("enqueuing task: " + earliest.name)
             self.execution_queue.put(earliest)
         
-        # Find current task
         if not self.execution_queue.empty():
-            self.current_task = self.execution_queue.queue[0]
+            if self.current_task is None:
+                self.current_task = self.execution_queue.get()
         else:
-            self.current_task = None
+            print("empty queue")
+        
         if self.current_task is not None:
-            # Se clock tick for o ultimo necessario para completar a duracao da tarefa
-            if len(self.current_task.moments_in_execution) == self.current_task.duration - 1:
-                # Dequeue
-                finished_task = self.execution_queue.get()
+            # Se clock tick for o ultimo necessario para completar a duracao da tarefa, finalizar tarefa
+            if len(self.current_task.moments_in_execution) == self.current_task.duration:
+                # Se ha tarefas para serem executadas na fila
+                if not self.execution_queue.empty():
+                    self.current_task.end = current_time
+                    finished_tasks.append(self.current_task)
+                    print("finished task: " + self.current_task.name)
+                    self.current_task = self.execution_queue.get()
+                else:
+                    self.current_task.end = current_time
+                    finished_tasks.append(self.current_task)
+                    self.current_task = None
 
-                print("finished task: " + finished_task.name)
-                finished_task.end = current_time + 1
+                
         print("FCFS selected")
 
         print('returning: ' + self.current_task.name if self.current_task else "returning None")
@@ -79,6 +87,7 @@ class OS_Simulator:
         self.current_time = 0
         self.current_task = None
         self.total_simulation_time = 0
+        self.finished_tasks = []
 
         # Variables for FCFS algorithm
         self.execution_queue = q.Queue()
@@ -90,14 +99,15 @@ class OS_Simulator:
 
 
     def update_chart(self):
+        print("current time: " + str(self.current_time))
         next_task = None
         if self.algorithm == "FCFS":
-            next_task = self.scheduler.exec(self.tasks, self.current_time)
+            next_task = self.scheduler.exec(self.tasks, self.current_time, self.finished_tasks)
         if next_task is not None:    
-            print("im here")
+            print("Executing task")
             next_task.moments_in_execution.append(self.current_time)
         # increment time
-        if self.current_time < self.total_simulation_time:
+        if len(self.finished_tasks) < len(self.tasks):
             self.current_time += 1
     
         # plot chart
@@ -113,11 +123,9 @@ class OS_Simulator:
                     self.ax.barh(task.name, 1, left=i, color=task.color, edgecolor="black")
                 elif i >= task.start and i < task.end:
                     self.ax.barh(task.name, 1, left=i, color="white", edgecolor="black")
-            
-        #self.fig = plt.barh([task.name for task in self.tasks], [task.duration for task in self.tasks], left=[task.start for task in self.tasks], color=[task.color for task in self.tasks], edgecolor="black")
         self.canvas.draw()
 
-        if self.current_time >= self.total_simulation_time:
+        if len(self.finished_tasks) == len(self.tasks):
             print("Simulation finished. Saving image")
             self.fig.savefig("image_output/output.png")
         
