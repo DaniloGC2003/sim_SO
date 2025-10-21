@@ -43,7 +43,7 @@ def upload_file(os_simulator, filename, window, chart_button):
     os_simulator.total_simulation_time += earliest_start.start
     
     if os_simulator.algorithm == "FCFS":
-        os_simulator.scheduler = cl.Scheduler("FCFS")
+        os_simulator.scheduler = cl.Scheduler("FCFS", os_simulator.quantum)
 
     #plot initial chart
     os_simulator.fig, os_simulator.ax = plt.subplots(figsize=(8,4))

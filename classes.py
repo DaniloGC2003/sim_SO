@@ -9,9 +9,12 @@ import queue as q
 X_AXIS_MIN_LENGTH = 15
 
 class Scheduler:
-    def __init__(self, algorithm):
+    def __init__(self, algorithm, quantum):
         self.algorithm = algorithm
         self.current_task = None
+        self.quantum = quantum
+        self.quantum_timer = 0
+        self.preemption_flag = False
 
         # Variables for FCFS algorithm
         self.execution_queue = q.Queue()
@@ -19,6 +22,13 @@ class Scheduler:
     def exec(self, tasks, current_time, finished_tasks):
         if self.algorithm == "FCFS":
             self.current_task = self.step_FCFS(tasks, current_time, finished_tasks)
+        self.quantum_timer = self.quantum_timer + 1
+        if self.quantum_timer == self.quantum:
+            self.quantum_timer = 0
+            self.preemption_flag = True
+        else:
+            self.preemption_flag = False
+
         return self.current_task
     # Step functions should return the task to be executed and check for task completion
     def step_FCFS(self, tasks, current_time, finished_tasks):
@@ -42,6 +52,7 @@ class Scheduler:
             print("enqueuing task: " + earliest.name)
             self.execution_queue.put(earliest)
         
+        # If the queue is not empty but there is no current task.
         if not self.execution_queue.empty():
             if self.current_task is None:
                 self.current_task = self.execution_queue.get()
@@ -51,6 +62,8 @@ class Scheduler:
         if self.current_task is not None:
             # Se clock tick for o ultimo necessario para completar a duracao da tarefa, finalizar tarefa
             if len(self.current_task.moments_in_execution) == self.current_task.duration:
+                # Reset quantum timer
+                self.quantum_timer = 0
                 # Se ha tarefas para serem executadas na fila
                 if not self.execution_queue.empty():
                     self.current_task.end = current_time
@@ -61,6 +74,10 @@ class Scheduler:
                     self.current_task.end = current_time
                     finished_tasks.append(self.current_task)
                     self.current_task = None
+            elif self.preemption_flag:
+                print("PREEMPTION")
+                self.execution_queue.put(self.current_task)
+                self.current_task = self.execution_queue.get()
 
                 
         print("FCFS selected")
