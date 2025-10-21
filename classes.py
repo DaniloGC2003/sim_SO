@@ -41,7 +41,7 @@ class Scheduler:
             self.preemption_flag = False
 
         return self.current_task
-    # Step functions should return the task to be executed and check for task completion
+    # Step functions should return the task to be executed
     def step_FCFS(self, tasks, current_time):
         # Enqueue tasks starting at current_time
 
