@@ -5,8 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import queue as q
+from utils import *
 
-X_AXIS_MIN_LENGTH = 15
 
 class Scheduler:
     def __init__(self, algorithm, quantum):
@@ -18,6 +18,17 @@ class Scheduler:
 
         # Variables for FCFS algorithm
         self.execution_queue = q.Queue()
+    
+    def reset(self):
+        print("Resetting scheduler")
+        self.algorithm = None
+        self.current_task = None
+        self.quantum = None
+        self.quantum_timer = 0
+        self.preemption_flag = False
+
+        self.execution_queue = q.Queue()
+
 
     def exec(self, tasks, current_time, finished_tasks):
         if self.algorithm == "FCFS":
@@ -105,9 +116,31 @@ class OS_Simulator:
         self.current_task = None
         self.total_simulation_time = 0
         self.finished_tasks = []
+        self.simulation_finished = False
+        self.simulation_mode = ""
 
-        # Variables for FCFS algorithm
-        self.execution_queue = q.Queue()
+
+    def reset(self):
+        print("Resetting OS simulator")
+        self.algorithm = ""
+        self.quantum = 0
+        self.tasks = []
+        self.scheduler.reset()
+
+        self.fig = None
+        self.ax = None
+        self.canvas = None
+        if self.widget is not None:
+            self.widget.pack_forget()
+            self.widget = None
+        self.df = None
+
+        self.current_time = 0
+        self.current_task = None
+        self.total_simulation_time = 0
+        self.finished_tasks = []
+        self.simulation_finished = False
+        self.simulation_mode = ""
         
     def print_self(self):
         print(f"Algorithm: {self.algorithm}, Quantum: {self.quantum}")
@@ -128,23 +161,27 @@ class OS_Simulator:
             self.current_time += 1
     
         # plot chart
-        self.ax.clear()
-        self.ax.set_xlim(0, max(X_AXIS_MIN_LENGTH, self.current_time + 1))
-        self.ax.set_xticks(range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1))
-        for x in range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1):
-            self.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
-        for task in self.tasks:
-            self.ax.barh(task.name, 0, left=0)
-            for i in range(self.current_time):
-                if i in task.moments_in_execution:
-                    self.ax.barh(task.name, 1, left=i, color=task.color, edgecolor="black")
-                elif i >= task.start and i < task.end:
-                    self.ax.barh(task.name, 1, left=i, color="white", edgecolor="black")
-        self.canvas.draw()
+        if self.simulation_mode == MANUAL_EXECUTION or len(self.finished_tasks) == len(self.tasks):
+            self.ax.clear()
+            self.ax.set_xlim(0, max(X_AXIS_MIN_LENGTH, self.current_time + 1))
+            self.ax.set_xticks(range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1))
+            for x in range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1):
+                self.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
+            for task in self.tasks:
+                self.ax.barh(task.name, 0, left=0)
+                for i in range(self.current_time):
+                    if i in task.moments_in_execution:
+                        self.ax.barh(task.name, 1, left=i, color=task.color, edgecolor="black")
+                    elif i >= task.start and i < task.end:
+                        self.ax.barh(task.name, 1, left=i, color="white", edgecolor="black")
+            self.canvas.draw()
 
         if len(self.finished_tasks) == len(self.tasks):
-            print("Simulation finished. Saving image")
-            self.fig.savefig("image_output/output.png")
+            print("Simulation finished")
+            if self.simulation_finished == False:
+                self.fig.savefig("image_output/output.png")
+                print("Saving image")
+            self.simulation_finished = True
         
         print()
 

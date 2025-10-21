@@ -4,9 +4,11 @@ import file_upload as fu
 import classes as cl
 import sys
 import matplotlib.pyplot as plt
+from utils import *
 
 
 simulator = cl.OS_Simulator()
+
 
 # Root window initial setup
 root = tk.Tk()
@@ -19,6 +21,17 @@ def on_close():
     plt.close('all') # Closes all matplotlib windows
     root.destroy()   # Closes Tkinter window
     sys.exit()       # Ensures the Python process stops
+
+def begin_simulation():
+    #manual_execution_button.pack_forget()
+    #automatic_execution_button.pack_forget()
+    notebook.pack_forget()
+    fu.upload_file(simulator, path_textbox.get("1.0", tk.END).strip(), image_frame, update_chart_button, tools_var)
+
+def reset_simulation():
+    simulator.reset()
+    update_chart_button.pack_forget()
+    notebook.pack(expand=True, fill="both")
 
 image = tk.PhotoImage(file="images/logo.png")
 
@@ -41,9 +54,12 @@ path_textbox = tk.Text(tools_frame, height=1, width=30)
 path_textbox.insert(tk.END, "ex1")
 path_textbox.pack(padx=10, pady=10) 
 
-upload_button = tk.Button(tools_frame, text="Upload config file", 
-                          command=lambda: fu.upload_file(simulator, path_textbox.get("1.0", tk.END).strip(), image_frame, update_chart_button))
+
+upload_button = tk.Button(tools_frame, text="Begin simulation", 
+                          command=begin_simulation)
 upload_button.pack(padx=5, pady=5)
+reset_simulation_button = tk.Button(tools_frame, text = "Reset simulation", command=reset_simulation)
+reset_simulation_button.pack(padx=5, pady=5)
 update_chart_button = tk.Button(tools_frame, text = "Update chart", 
                                 command=lambda: simulator.update_chart())
 #update_chart_button.pack(padx = 5, pady = 5)
@@ -53,17 +69,27 @@ notebook = ttk.Notebook(tools_frame)
 notebook.pack(expand=True, fill="both")
 
 tools_tab = tk.Frame(notebook, bg="lightblue")
-tools_var = tk.StringVar(value="None")
+tools_var = tk.StringVar(value=MANUAL_EXECUTION)
 
-for tool in ["Resizing", "Rotating"]:
-    tk.Radiobutton(
+manual_execution_button = tk.Radiobutton(
         tools_tab,
-        text=tool,
+        text=MANUAL_EXECUTION,
         variable=tools_var,
-        value=tool,
+        value=MANUAL_EXECUTION,
         bg="lightblue",
-    ).pack(anchor="w", padx=20, pady=5)
+    )
+manual_execution_button.pack(anchor="w", padx=20, pady=5)
+automatic_execution_button = tk.Radiobutton(
+        tools_tab,  
+        text=AUTOMATIC_EXECUTION,
+        variable=tools_var,
+        value=AUTOMATIC_EXECUTION,
+        bg="lightblue",
+    )
+automatic_execution_button.pack(anchor="w", padx=20, pady=5)
+notebook.add(tools_tab, text="Tools")
 
+'''
 filters_tab = tk.Frame(notebook, bg="lightgreen")
 filters_var = tk.StringVar(value="None")
 
@@ -75,9 +101,9 @@ for filter in ["Blurring", "Sharpening"]:
         value=filter,
         bg="lightgreen",
     ).pack(anchor="w", padx=20, pady=5)
+#notebook.add(filters_tab, text="Filters")
+'''
 
-notebook.add(tools_tab, text="Tools")
-notebook.add(filters_tab, text="Filters")
 
 # Image frame
 image_frame = tk.Frame(root, bg="grey")

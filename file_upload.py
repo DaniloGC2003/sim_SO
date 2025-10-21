@@ -4,11 +4,12 @@ from tkinter import filedialog
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from utils import *
 
 X_AXIS_MIN_LENGTH = 15
 
 
-def upload_file(os_simulator, filename, window, chart_button):
+def upload_file(os_simulator, filename, window, chart_button, simulation_mode):
     print("File upload function called")
     string = "config_files/" + filename + ".txt"
     with open(string, 'r') as file:
@@ -21,6 +22,7 @@ def upload_file(os_simulator, filename, window, chart_button):
     print(lines)
     os_simulator.algorithm = os_config[0]
     os_simulator.quantum = int(os_config[1])
+    os_simulator.simulation_mode = simulation_mode.get()
 
     for line in lines[1:]:
         task_info = line.split(";")
@@ -57,4 +59,10 @@ def upload_file(os_simulator, filename, window, chart_button):
     os_simulator.widget = os_simulator.canvas.get_tk_widget()
     os_simulator.widget.pack(padx=10, pady=10)
 
-    chart_button.pack(padx = 5, pady = 5)
+
+    # Different behavior based on execution mode
+    if simulation_mode.get() == MANUAL_EXECUTION:
+        chart_button.pack(padx = 5, pady = 5)
+    elif simulation_mode.get() == AUTOMATIC_EXECUTION:
+        while os_simulator.simulation_finished == False:
+            os_simulator.update_chart()
