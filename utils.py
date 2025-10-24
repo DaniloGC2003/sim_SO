@@ -2,3 +2,6 @@ MANUAL_EXECUTION = "Manual execution"
 AUTOMATIC_EXECUTION = "Automatic Execution"
 
 X_AXIS_MIN_LENGTH = 15
+
+GUI_MAIN_COLOR = "#95b88d"
+GUI_TAB_COLOR = "#76966f"

@@ -14,7 +14,7 @@ simulator = cl.OS_Simulator()
 root = tk.Tk()
 root.title("OS simulator")
 root.minsize(768, 432)
-root.config(background="#95b88d")
+root.config(background=GUI_MAIN_COLOR)
 
 # Function called when closing the window
 def on_close():
@@ -36,19 +36,19 @@ def reset_simulation():
 image = tk.PhotoImage(file="images/logo.png")
 
 # Tools frame
-tools_frame = tk.Frame(root, bg="skyblue")
+tools_frame = tk.Frame(root, bg=GUI_TAB_COLOR)
 tools_frame.pack(padx=5, pady=5, side=tk.LEFT, fill=tk.Y) 
 
 tk.Label(
     tools_frame,
-    text="RECEBA",
-    bg="skyblue",
+    text="OS scheduler simulator",
+    bg=GUI_TAB_COLOR,
 ).pack(padx=5, pady=5)
 
 thumbnail_image = image.subsample(5, 5)
-tk.Label(tools_frame, image=thumbnail_image).pack(padx=5, pady=5)
+#tk.Label(tools_frame, image=thumbnail_image).pack(padx=5, pady=5)
 
-path_label = tk.Label(tools_frame, text=".txt config file inside config_files folder:", bg="skyblue")
+path_label = tk.Label(tools_frame, text=".txt config file inside config_files folder:", bg=GUI_TAB_COLOR)
 path_label.pack(padx=5)
 path_textbox = tk.Text(tools_frame, height=1, width=30)
 path_textbox.insert(tk.END, "ex1")
@@ -68,7 +68,7 @@ update_chart_button = tk.Button(tools_frame, text = "Update chart",
 notebook = ttk.Notebook(tools_frame)
 notebook.pack(expand=True, fill="both")
 
-tools_tab = tk.Frame(notebook, bg="lightblue")
+tools_tab = tk.Frame(notebook, bg=GUI_TAB_COLOR)
 tools_var = tk.StringVar(value=MANUAL_EXECUTION)
 
 manual_execution_button = tk.Radiobutton(
@@ -76,7 +76,7 @@ manual_execution_button = tk.Radiobutton(
         text=MANUAL_EXECUTION,
         variable=tools_var,
         value=MANUAL_EXECUTION,
-        bg="lightblue",
+        bg=GUI_TAB_COLOR,
     )
 manual_execution_button.pack(anchor="w", padx=20, pady=5)
 automatic_execution_button = tk.Radiobutton(
@@ -84,7 +84,7 @@ automatic_execution_button = tk.Radiobutton(
         text=AUTOMATIC_EXECUTION,
         variable=tools_var,
         value=AUTOMATIC_EXECUTION,
-        bg="lightblue",
+        bg=GUI_TAB_COLOR,
     )
 automatic_execution_button.pack(anchor="w", padx=20, pady=5)
 notebook.add(tools_tab, text="Tools")
@@ -106,11 +106,11 @@ for filter in ["Blurring", "Sharpening"]:
 
 
 # Image frame
-image_frame = tk.Frame(root, bg="grey")
+image_frame = tk.Frame(root, bg=GUI_MAIN_COLOR)
 image_frame.pack(padx=5, pady=5, side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
 display_image = image.subsample(2, 2)
-
+'''
 tk.Label(
     image_frame,
     text="Image",
@@ -119,6 +119,7 @@ tk.Label(
 ).pack(padx=5, pady=5)
 
 tk.Label(image_frame, image=display_image).pack(padx=5, pady=5)
+'''
 
 # Make sure the program is terminated after closing the window
 root.protocol("WM_DELETE_WINDOW", on_close)
