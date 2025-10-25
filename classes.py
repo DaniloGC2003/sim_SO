@@ -159,6 +159,7 @@ class OS_Simulator:
     
         # plot chart
         if self.simulation_mode == MANUAL_EXECUTION or len(self.finished_tasks) == len(self.tasks):
+            print("simulation mode")
             self.ax.clear()
             self.ax.set_xlim(0, max(X_AXIS_MIN_LENGTH, self.current_time + 1))
             self.ax.set_xticks(range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1))
