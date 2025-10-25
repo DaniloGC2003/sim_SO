@@ -48,7 +48,7 @@ def configure_file(filename, tree, tree_simulator, simulator_data_label):
         for item in tree_simulator.get_children():
             tree_simulator.delete(item)
         with open(path, "r", encoding="utf-8") as f:
-            lines = [linha.strip() for linha in f if linha.strip()]
+            lines = [line.strip() for line in f if line.strip()]
         algoritmo, quantum = lines[0].split(";")
         simulator_data_label["text"] = f"Algoritmo: {algoritmo} | Quantum: {quantum}"
 
@@ -67,8 +67,8 @@ def configure_file(filename, tree, tree_simulator, simulator_data_label):
             tree_simulator.heading(col, text=col.capitalize())
             tree_simulator.column(col, width=100, anchor="center")
 
-        for linha in lines[1:]:
-            valores = linha.split(";")
+        for line in lines[1:]:
+            valores = line.split(";")
             if len(valores) == len(colunas):
                 tree.insert("", "end", values=valores)
         values_simulator = lines[0].split(";")
@@ -76,109 +76,181 @@ def configure_file(filename, tree, tree_simulator, simulator_data_label):
     else:
         print("Bad config file")
 
+def validate_table(tree, tree_simulator):
+    """
+    Validates the data inside two Tkinter Treeviews:
+    - tree_simulator: contains one row with [algorithm, quantum]
+    - tree: contains multiple rows with [id, color, arrival, duration, priority, event_list]
+
+    Returns True if valid, False otherwise.
+    """
+
+    # ====== Validate simulator info ======
+    sim_rows = tree_simulator.get_children()
+    if len(sim_rows) == 0:
+        print("Error: Simulator table is empty.")
+        return False
+
+    # Expect exactly one row (algorithm, quantum)
+    sim_values = tree_simulator.item(sim_rows[0], "values")
+    if len(sim_values) != 2:
+        print("Error: Simulator table must contain two columns: algorithm and quantum.")
+        return False
+
+    algorithm, quantum = sim_values
+    if not algorithm.isalpha():
+        print(f"Error: Invalid algorithm '{algorithm}'. Must contain only letters.")
+        return False
+    if not quantum.isdigit() or int(quantum) <= 0:
+        print(f"Error: Invalid quantum '{quantum}'. Must be a positive integer.")
+        return False
+
+    # ====== Validate tasks ======
+    task_rows = tree.get_children()
+    if len(task_rows) == 0:
+        print("Error: Task table is empty.")
+        return False
+
+    color_pattern = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+    for i, row_id in enumerate(task_rows, start=1):
+        values = tree.item(row_id, "values")
+        if len(values) != 6:
+            print(f"Error: Row {i} has incorrect number of columns ({len(values)}). Expected 6.")
+            return False
+
+        id_, color, arrival, duration, priority, events = values
+
+        if not id_:
+            print(f"Error: Row {i}: ID is empty.")
+            return False
+
+        if not color_pattern.match(color):
+            print(f"Error: Row {i}: Invalid color '{color}'. Must be in #RRGGBB format.")
+            return False
+
+        for val, name in [(arrival, "arrival"), (duration, "duration"), (priority, "priority")]:
+            if not val.isdigit() or int(val) < 0:
+                print(f"Error: Row {i}: Invalid '{name}' value '{val}'. Must be a non-negative integer.")
+                return False
+
+        if events != "-" and not all(e.strip() for e in events.split(",")):
+            print(f"Error: Row {i}: Invalid event list '{events}'.")
+            return False
+
+    print("Validation successful: all tables are valid.")
+    return True
+
 def validate_file(filename):
     path = "config_files/" + filename + ".txt"
     try:
         with open(path, "r", encoding="utf-8") as f:
-            linhas = [linha.strip() for linha in f if linha.strip()]
+            lines = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
-        print("Arquivo não encontrado.")
+        print("File not found.")
         return False
 
-    if len(linhas) < 2:
-        print("Arquivo muito curto.")
+    if len(lines) < 2:
+        print("File too short. Make sure the file contains at least 2 lines.")
         return False
 
-    # ===== Validação da primeira linha =====
-    primeira = linhas[0].split(";")
+    # First line (OS settings)
+    primeira = lines[0].split(";")
     if len(primeira) != 2:
-        print("Primeira linha deve ter 2 campos: algoritmo;quantum")
+        print("First line should contain 2 fields: algorithm and quantum.")
         return False
 
     algoritmo, quantum = primeira
     if not algoritmo.isalpha():
-        print("Algoritmo inválido (deve conter apenas letras).")
+        print("Algorithm should only consist of letters.")
         return False
     if not quantum.isdigit() or int(quantum) <= 0:
-        print("Quantum deve ser um número inteiro positivo.")
+        print("Quantum must be a positive integer.")
         return False
 
-    # ===== Validação das tarefas =====
+    # Other lines (tasks)
     padrao_cor = re.compile(r"^#[0-9a-fA-F]{6}$")
-    for i, linha in enumerate(linhas[1:], start=2):
-        partes = linha.split(";")
+    for i, line in enumerate(lines[1:], start=2):
+        partes = line.split(";")
         if len(partes) != 6:
-            print(f"Linha {i}: número incorreto de campos ({len(partes)}).")
+            print(f"line {i}: not enough fields ({len(partes)}).")
             return False
 
         id_, cor, ingresso, duracao, prioridade, eventos = partes
 
         if not id_:
-            print(f"Linha {i}: ID vazio.")
+            print(f"line {i}: ID empty.")
             return False
         if not padrao_cor.match(cor):
-            print(f"Linha {i}: cor inválida ({cor}).")
+            print(f"line {i}: invalid color ({cor}).")
             return False
         for campo, nome in [(ingresso, "ingresso"), (duracao, "duracao"), (prioridade, "prioridade")]:
             if not campo.isdigit() or int(campo) < 0:
-                print(f"Linha {i}: campo '{nome}' inválido ({campo}).")
+                print(f"line {i}: field '{nome}' invalid ({campo}).")
                 return False
         # lista_eventos pode ser '-' ou lista separada por vírgulas
         if eventos != "-" and not all(e.strip() for e in eventos.split(",")):
-            print(f"Linha {i}: lista_eventos inválida ({eventos}).")
+            print(f"line {i}: invalid event list ({eventos}).")
             return False
 
-    print("Arquivo válido!")
+    print("Valid file")
     return True
 
-def begin_simulation(os_simulator, filename, window, chart_button, simulation_mode, tree, tree_simulator):
-    print("File upload function called")
-    simulation_lines = []
-    for row_id in tree.get_children():
-        simulation_lines.append(tree.item(row_id, "values"))
+def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, tree_simulator):
+    print("Beginning simulation.")
+    # Make sure data in tables is valid (user might have added invalid data through the GUI)
+    if validate_table(tree, tree_simulator):
+        simulation_lines = []
 
-    os_data = []
-    os_data = tree_simulator.item(tree_simulator.get_children()[0], "values")
-    print(os_data)
-    os_simulator.algorithm = os_data[0]
-    os_simulator.quantum = int(os_data[1])
-    os_simulator.simulation_mode = simulation_mode.get()
+        # Retrieve tasks
+        for row_id in tree.get_children():
+            simulation_lines.append(tree.item(row_id, "values"))
 
-
-
-    for line in simulation_lines:
-        print('creating new task')
-        task = cl.Task(line[0], line[1], int(line[2]), int(line[3]), int(line[4]), line[5])
-        print(task.name)
-        os_simulator.tasks.append(task)
-        os_simulator.total_simulation_time += int(line[3])
-    
-    earliest_start = None
-    for task in os_simulator.tasks:
-        if earliest_start is None or task.start < earliest_start.start:
-            earliest_start = task
-    os_simulator.total_simulation_time += earliest_start.start
-    
-    if os_simulator.algorithm == "FCFS":
-        os_simulator.scheduler = cl.Scheduler("FCFS", os_simulator.quantum)
-
-    #plot initial chart
-    os_simulator.fig, os_simulator.ax = plt.subplots(figsize=(PLOT_INITIAL_WIDTH,PLOT_INITIAL_HEIGHT))
-    os_simulator.ax.set_xlim(0, X_AXIS_MIN_LENGTH)
-    os_simulator.ax.set_xticks(range(int(os_simulator.ax.get_xlim()[0]), int(os_simulator.ax.get_xlim()[1]) + 1))
-    for x in range(int(os_simulator.ax.get_xlim()[0]), int(os_simulator.ax.get_xlim()[1]) + 1):
-        os_simulator.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
-    for task in os_simulator.tasks:
-        os_simulator.ax.barh(task.name, 0, left=0)
-    os_simulator.canvas = FigureCanvasTkAgg(os_simulator.fig, master=window)
-    os_simulator.widget = os_simulator.canvas.get_tk_widget()
-    os_simulator.widget.pack(padx=10, pady=10)
+        # Retrieve algorithm and quantum and store into os_simulator
+        os_data = []
+        os_data = tree_simulator.item(tree_simulator.get_children()[0], "values")
+        print(os_data)
+        os_simulator.algorithm = os_data[0]
+        os_simulator.quantum = int(os_data[1])
+        os_simulator.simulation_mode = simulation_mode.get()
 
 
-    # Different behavior based on execution mode
-    if simulation_mode.get() == MANUAL_EXECUTION:
-        print("im here")
-        chart_button.pack(padx = 5, pady = 5)
-    elif simulation_mode.get() == AUTOMATIC_EXECUTION:
-        while os_simulator.simulation_finished == False:
-            os_simulator.update_chart()
+        # Create task objects
+        for line in simulation_lines:
+            print('creating new task')
+            task = cl.Task(line[0], line[1], int(line[2]), int(line[3]), int(line[4]), line[5])
+            print(task.name)
+            os_simulator.tasks.append(task)
+            os_simulator.total_simulation_time += int(line[3])
+        
+        # Account for gaps between tasks
+        earliest_start = None
+        for task in os_simulator.tasks:
+            if earliest_start is None or task.start < earliest_start.start:
+                earliest_start = task
+        os_simulator.total_simulation_time += earliest_start.start
+        
+        # create scheduler object
+        if os_simulator.algorithm == "FCFS":
+            os_simulator.scheduler = cl.Scheduler("FCFS", os_simulator.quantum)
+
+        #plot initial chart
+        os_simulator.fig, os_simulator.ax = plt.subplots(figsize=(PLOT_INITIAL_WIDTH,PLOT_INITIAL_HEIGHT))
+        os_simulator.ax.set_xlim(0, X_AXIS_MIN_LENGTH)
+        os_simulator.ax.set_xticks(range(int(os_simulator.ax.get_xlim()[0]), int(os_simulator.ax.get_xlim()[1]) + 1))
+        for x in range(int(os_simulator.ax.get_xlim()[0]), int(os_simulator.ax.get_xlim()[1]) + 1):
+            os_simulator.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
+        for task in os_simulator.tasks:
+            os_simulator.ax.barh(task.name, 0, left=0)
+        os_simulator.canvas = FigureCanvasTkAgg(os_simulator.fig, master=window)
+        os_simulator.widget = os_simulator.canvas.get_tk_widget()
+        os_simulator.widget.pack(padx=10, pady=10)
+
+
+        # Different behavior based on execution mode
+        if simulation_mode.get() == MANUAL_EXECUTION:
+            print("im here")
+            chart_button.pack(padx = 5, pady = 5)
+        elif simulation_mode.get() == AUTOMATIC_EXECUTION:
+            while os_simulator.simulation_finished == False:
+                os_simulator.update_chart()

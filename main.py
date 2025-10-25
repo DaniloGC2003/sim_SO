@@ -14,8 +14,13 @@ simulator = cl.OS_Simulator()
 # Root window initial setup
 root = tk.Tk()
 root.title("OS simulator")
-root.minsize(1304, 530)
+root.minsize(1673, 735)
 root.config(background=GUI_MAIN_COLOR)
+
+
+# Called after double-clicking on a cell
+def edit_cell_simulator(event):
+    fu.edit_cell(event, tree_simulator)
 
 # Called after double-clicking on a cell
 def edit_cell(event):
@@ -37,12 +42,10 @@ def upload_file():
     fu.configure_file(path_textbox.get("1.0", tk.END).strip(), tree, tree_simulator, simulator_data_label)
 
 def begin_simulation():
-    #manual_execution_button.pack_forget()
-    #automatic_execution_button.pack_forget()
     notebook.pack_forget()
     begin_simulation_button.pack_forget()
     reset_simulation_button.pack(padx=5, pady=5)
-    fu.begin_simulation(simulator, path_textbox.get("1.0", tk.END).strip(), image_frame, update_chart_button, tools_var, tree, tree_simulator)
+    fu.begin_simulation(simulator, image_frame, update_chart_button, tools_var, tree, tree_simulator)
 
 def reset_simulation():
     simulator.reset()
@@ -61,6 +64,7 @@ tk.Label(
     tools_frame,
     text="OS scheduler simulator",
     bg=GUI_TAB_COLOR,
+    width=85
 ).pack(padx=5, pady=5)
 
 thumbnail_image = image.subsample(5, 5)
@@ -79,7 +83,6 @@ begin_simulation_button = tk.Button(tools_frame, text="Begin simulation",
 reset_simulation_button = tk.Button(tools_frame, text = "Reset simulation", command=reset_simulation)
 update_chart_button = tk.Button(tools_frame, text = "Update chart", 
                                 command=lambda: simulator.update_chart())
-#update_chart_button.pack(padx = 5, pady = 5)
 
 # Tools and Filters tabs
 notebook = ttk.Notebook(tools_frame)
@@ -107,15 +110,17 @@ automatic_execution_button.pack(anchor="w", padx=20, pady=5)
 simulator_data_label = ttk.Label(tools_tab, text="", background=GUI_TAB_COLOR)
 simulator_data_label.pack(pady=10)
 
+# table for storing algorithm and quantum
 frame_table_simulator = ttk.Frame(tools_tab)
 frame_table_simulator.pack(fill=tk.BOTH, expand=True)
 tree_simulator = ttk.Treeview(frame_table_simulator)
 tree_simulator.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-tree_simulator.bind("<Double-1>", edit_cell)
+tree_simulator.bind("<Double-1>", edit_cell_simulator)
 scroll_y = ttk.Scrollbar(frame_table_simulator, orient=tk.VERTICAL, command=tree_simulator.yview)
 scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
 tree_simulator.configure(yscrollcommand=scroll_y.set)
 
+# table for storing task configs
 frame_table = ttk.Frame(tools_tab)
 frame_table.pack(fill=tk.BOTH, expand=True)
 tree = ttk.Treeview(frame_table)

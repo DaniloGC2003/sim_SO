@@ -29,7 +29,7 @@ class Scheduler:
 
         self.execution_queue = q.Queue()
 
-
+    # Execute 1 step of the simulation
     def exec(self, tasks, current_time):
         if self.algorithm == "FCFS":
             self.current_task = self.step_FCFS(tasks, current_time)
@@ -41,6 +41,7 @@ class Scheduler:
             self.preemption_flag = False
 
         return self.current_task
+    
     # Step functions should return the task to be executed
     def step_FCFS(self, tasks, current_time):
         # Enqueue tasks starting at current_time
