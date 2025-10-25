@@ -40,7 +40,7 @@ def edit_cell(event, tree):
     entry.bind("<Escape>", cancel_writing)
     entry.bind("<FocusOut>", save)
 
-def configure_file(filename, tree, tree_simulator, simulator_data_label):
+def configure_file(filename, tree, tree_simulator):
     path = "config_files/" + filename + ".txt"
     if validate_file(filename):
         for item in tree.get_children():
@@ -50,7 +50,6 @@ def configure_file(filename, tree, tree_simulator, simulator_data_label):
         with open(path, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
         algoritmo, quantum = lines[0].split(";")
-        simulator_data_label["text"] = f"Algoritmo: {algoritmo} | Quantum: {quantum}"
 
         colunas_simulator = ["algorithm", "quantum"]
         tree_simulator["columns"] = colunas_simulator

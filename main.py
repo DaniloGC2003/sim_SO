@@ -14,7 +14,7 @@ simulator = cl.OS_Simulator()
 # Root window initial setup
 root = tk.Tk()
 root.title("OS simulator")
-root.minsize(1206, 735)
+root.minsize(1206, 500)
 root.config(background=GUI_MAIN_COLOR)
 
 
@@ -37,21 +37,25 @@ def on_close():
 
 def upload_file():
     upload_button.pack_forget()
+    path_label.pack_forget()
+    path_textbox.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
     begin_simulation_button.pack(padx=5, pady=5)
-    fu.configure_file(path_textbox.get("1.0", tk.END).strip(), tree, tree_simulator, simulator_data_label)
+    fu.configure_file(path_textbox.get("1.0", tk.END).strip(), tree, tree_simulator)
 
 def begin_simulation():
     notebook.pack_forget()
     begin_simulation_button.pack_forget()
     reset_simulation_button.pack(padx=5, pady=5)
-    fu.begin_simulation(simulator, image_frame, update_chart_button, tools_var, tree, tree_simulator)
+    fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, tree_simulator)
 
 def reset_simulation():
     simulator.reset()
     update_chart_button.pack_forget()
     reset_simulation_button.pack_forget()
     notebook.pack_forget()
+    path_label.pack(padx=5)
+    path_textbox.pack(padx=10, pady=10) 
     upload_button.pack(padx=5, pady=5)
 
 image = tk.PhotoImage(file="images/logo.png")
@@ -87,43 +91,50 @@ update_chart_button = tk.Button(tools_frame, text = "Update chart",
 # Tools and Filters tabs
 notebook = ttk.Notebook(tools_frame)
 
-tools_tab = tk.Frame(notebook, bg=GUI_TAB_COLOR)
-tools_var = tk.StringVar(value=MANUAL_EXECUTION)
+# Tools tab
+general_settings_tab = tk.Frame(notebook, bg=GUI_TAB_COLOR)
+general_settings_var = tk.StringVar(value=MANUAL_EXECUTION)
 
 manual_execution_button = tk.Radiobutton(
-        tools_tab,
+        general_settings_tab,
         text=MANUAL_EXECUTION,
-        variable=tools_var,
+        variable=general_settings_var,
         value=MANUAL_EXECUTION,
         bg=GUI_TAB_COLOR,
     )
 manual_execution_button.pack(anchor="w", padx=20, pady=5)
 automatic_execution_button = tk.Radiobutton(
-        tools_tab,  
+        general_settings_tab,  
         text=AUTOMATIC_EXECUTION,
-        variable=tools_var,
+        variable=general_settings_var,
         value=AUTOMATIC_EXECUTION,
         bg=GUI_TAB_COLOR,
     )
 automatic_execution_button.pack(anchor="w", padx=20, pady=5)
 
-simulator_data_label = ttk.Label(tools_tab, text="", background=GUI_TAB_COLOR)
-simulator_data_label.pack(pady=10)
-
 
 table_width = 1
+
 # table for storing algorithm and quantum
-frame_table_simulator = ttk.Frame(tools_tab)
+frame_table_simulator = ttk.Frame(general_settings_tab)
 frame_table_simulator.pack(fill=tk.BOTH, expand=True)
 tree_simulator = ttk.Treeview(frame_table_simulator)
 tree_simulator.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 tree_simulator.bind("<Double-1>", edit_cell_simulator)
-scroll_y = ttk.Scrollbar(frame_table_simulator, orient=tk.VERTICAL, command=tree_simulator.yview)
-scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
-tree_simulator.configure(yscrollcommand=scroll_y.set)
+#scroll_y = ttk.Scrollbar(frame_table_simulator, orient=tk.VERTICAL, command=tree_simulator.yview)
+#scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+#tree_simulator.configure(yscrollcommand=scroll_y.set)
+
+
+
+notebook.add(general_settings_tab, text="General Settings")
+
+# Filters tab
+filters_tab = tk.Frame(notebook, bg="lightgreen")
+filters_var = tk.StringVar(value="None")
 
 # table for storing task configs
-frame_table = ttk.Frame(tools_tab, width=table_width)
+frame_table = ttk.Frame(filters_tab, width=table_width)
 frame_table.pack(fill=tk.BOTH, expand=True)
 tree = ttk.Treeview(frame_table)
 tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -132,23 +143,16 @@ scroll_y = ttk.Scrollbar(frame_table, orient=tk.VERTICAL, command=tree.yview)
 scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
 tree.configure(yscrollcommand=scroll_y.set)
 
-notebook.add(tools_tab, text="Tools")
-
-
-'''
-filters_tab = tk.Frame(notebook, bg="lightgreen")
-filters_var = tk.StringVar(value="None")
-
-for filter in ["Blurring", "Sharpening"]:
+'''for filter in ["Blurring", "Sharpening"]:
     tk.Radiobutton(
         filters_tab,
         text=filter,
         variable=filters_var,
         value=filter,
         bg="lightgreen",
-    ).pack(anchor="w", padx=20, pady=5)
-#notebook.add(filters_tab, text="Filters")
-'''
+    ).pack(anchor="w", padx=20, pady=5)'''
+notebook.add(filters_tab, text="Tasks")
+
 
 
 # Image frame
