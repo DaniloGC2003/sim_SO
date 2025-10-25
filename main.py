@@ -14,7 +14,7 @@ simulator = cl.OS_Simulator()
 # Root window initial setup
 root = tk.Tk()
 root.title("OS simulator")
-root.minsize(1406, 735)
+root.minsize(1206, 735)
 root.config(background=GUI_MAIN_COLOR)
 
 
