@@ -14,7 +14,7 @@ simulator = cl.OS_Simulator()
 # Root window initial setup
 root = tk.Tk()
 root.title("OS simulator")
-root.minsize(1673, 735)
+root.minsize(1406, 735)
 root.config(background=GUI_MAIN_COLOR)
 
 
@@ -64,7 +64,7 @@ tk.Label(
     tools_frame,
     text="OS scheduler simulator",
     bg=GUI_TAB_COLOR,
-    width=85
+    width=50
 ).pack(padx=5, pady=5)
 
 thumbnail_image = image.subsample(5, 5)
@@ -110,6 +110,8 @@ automatic_execution_button.pack(anchor="w", padx=20, pady=5)
 simulator_data_label = ttk.Label(tools_tab, text="", background=GUI_TAB_COLOR)
 simulator_data_label.pack(pady=10)
 
+
+table_width = 1
 # table for storing algorithm and quantum
 frame_table_simulator = ttk.Frame(tools_tab)
 frame_table_simulator.pack(fill=tk.BOTH, expand=True)
@@ -121,7 +123,7 @@ scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
 tree_simulator.configure(yscrollcommand=scroll_y.set)
 
 # table for storing task configs
-frame_table = ttk.Frame(tools_tab)
+frame_table = ttk.Frame(tools_tab, width=table_width)
 frame_table.pack(fill=tk.BOTH, expand=True)
 tree = ttk.Treeview(frame_table)
 tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)

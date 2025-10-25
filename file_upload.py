@@ -62,7 +62,7 @@ def configure_file(filename, tree, tree_simulator, simulator_data_label):
 
         for col in colunas:
             tree.heading(col, text=col.capitalize())
-            tree.column(col, width=100, anchor="center")
+            tree.column(col, width=50, anchor="center")
         for col in colunas_simulator:
             tree_simulator.heading(col, text=col.capitalize())
             tree_simulator.column(col, width=100, anchor="center")
