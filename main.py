@@ -17,6 +17,13 @@ root.title("OS simulator")
 root.minsize(1206, 500)
 root.config(background=GUI_MAIN_COLOR)
 
+def remove_task():
+    tasks = []
+    task_to_be_removed = remove_task_textbox.get("1.0", tk.END).strip()
+    for row_id in tree.get_children():
+        task = tree.item(row_id, "values")
+        if task[0] == task_to_be_removed:
+            tree.delete(row_id)
 
 # Called after double-clicking on a cell
 def edit_cell_simulator(event):
@@ -91,7 +98,7 @@ update_chart_button = tk.Button(tools_frame, text = "Update chart",
 # Tools and Filters tabs
 notebook = ttk.Notebook(tools_frame)
 
-# Tools tab
+# General settings tab
 general_settings_tab = tk.Frame(notebook, bg=GUI_TAB_COLOR)
 general_settings_var = tk.StringVar(value=MANUAL_EXECUTION)
 
@@ -129,12 +136,12 @@ tree_simulator.bind("<Double-1>", edit_cell_simulator)
 
 notebook.add(general_settings_tab, text="General Settings")
 
-# Filters tab
-filters_tab = tk.Frame(notebook, bg="lightgreen")
-filters_var = tk.StringVar(value="None")
+# Tasks tab
+tasks_tab = tk.Frame(notebook, bg="lightgreen")
+tasks_var = tk.StringVar(value="None")
 
 # table for storing task configs
-frame_table = ttk.Frame(filters_tab, width=table_width)
+frame_table = ttk.Frame(tasks_tab, width=table_width)
 frame_table.pack(fill=tk.BOTH, expand=True)
 tree = ttk.Treeview(frame_table)
 tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -143,15 +150,27 @@ scroll_y = ttk.Scrollbar(frame_table, orient=tk.VERTICAL, command=tree.yview)
 scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
 tree.configure(yscrollcommand=scroll_y.set)
 
+remove_task_frame = tk.Frame(tasks_tab)
+remove_task_frame.pack()
+remove_task_label = tk.Label(
+    remove_task_frame,
+    text="Remove task:"
+)
+remove_task_label.pack(padx=5, pady=5, side="left")
+remove_task_textbox = tk.Text(remove_task_frame, height=1, width=30)
+remove_task_textbox.pack(padx=10, pady=10, side="left") 
+remove_task_button = tk.Button(remove_task_frame, text="Remove task", command=remove_task)
+remove_task_button.pack(padx=5, pady=5)
+
 '''for filter in ["Blurring", "Sharpening"]:
     tk.Radiobutton(
-        filters_tab,
+        tasks_tab,
         text=filter,
-        variable=filters_var,
+        variable=tasks_var,
         value=filter,
         bg="lightgreen",
     ).pack(anchor="w", padx=20, pady=5)'''
-notebook.add(filters_tab, text="Tasks")
+notebook.add(tasks_tab, text="Tasks")
 
 
 
