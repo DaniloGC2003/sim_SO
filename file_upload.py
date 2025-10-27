@@ -40,40 +40,39 @@ def edit_cell(event, tree):
     entry.bind("<FocusOut>", save)
 
 def configure_file(filename, tree, tree_simulator):
+    for item in tree.get_children():
+            tree.delete(item)
+    for item in tree_simulator.get_children():
+        tree_simulator.delete(item)
+
+    colunas_simulator = ["algorithm", "quantum"]
+    tree_simulator["columns"] = colunas_simulator
+    tree_simulator["show"] = "headings"
+
+    colunas = ["id", "cor", "ingresso", "duracao", "prioridade", "lista_eventos"]
+    tree["columns"] = colunas
+    tree["show"] = "headings"
+
+    for col in colunas:
+        tree.heading(col, text=col.capitalize())
+        tree.column(col, width=50, anchor="center")
+    for col in colunas_simulator:
+        tree_simulator.heading(col, text=col.capitalize())
+        tree_simulator.column(col, width=100, anchor="center")
+    # Check if data format is valid
     if filename != "":
         if validate_file(filename):
-            for item in tree.get_children():
-                tree.delete(item)
-            for item in tree_simulator.get_children():
-                tree_simulator.delete(item)
             with open(filename, "r", encoding="utf-8") as f:
                 lines = [line.strip() for line in f if line.strip()]
-            algoritmo, quantum = lines[0].split(";")
-
-            colunas_simulator = ["algorithm", "quantum"]
-            tree_simulator["columns"] = colunas_simulator
-            tree_simulator["show"] = "headings"
-
-            colunas = ["id", "cor", "ingresso", "duracao", "prioridade", "lista_eventos"]
-            tree["columns"] = colunas
-            tree["show"] = "headings"
-
-            for col in colunas:
-                tree.heading(col, text=col.capitalize())
-                tree.column(col, width=50, anchor="center")
-            for col in colunas_simulator:
-                tree_simulator.heading(col, text=col.capitalize())
-                tree_simulator.column(col, width=100, anchor="center")
-
-            for line in lines[1:]:
-                valores = line.split(";")
-                if len(valores) == len(colunas):
-                    tree.insert("", "end", values=valores)
-            values_simulator = lines[0].split(";")
-            tree_simulator.insert("", "end", values=values_simulator)
-        else:
-            print("Bad config file")
-
+            if filename != "":
+                for line in lines[1:]:
+                    valores = line.split(";")
+                    if len(valores) == len(colunas):
+                        tree.insert("", "end", values=valores)
+                values_simulator = lines[0].split(";")
+                tree_simulator.insert("", "end", values=values_simulator)
+    else:
+        tree_simulator.insert("", "end", values=["-", "-"])
 def validate_table(tree, tree_simulator):
     # ====== Validate simulator info ======
     sim_rows = tree_simulator.get_children()
@@ -243,5 +242,8 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
         elif simulation_mode.get() == AUTOMATIC_EXECUTION:
             while os_simulator.simulation_finished == False:
                 os_simulator.update_chart()
+
+        return True
     else:
         messagebox.showerror("Error", "Please make sure the table contains only valid data")
+        return False

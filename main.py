@@ -61,6 +61,7 @@ def upload_file():
         return
     print(caminho)
     
+    no_config_button.pack_forget()
     upload_button.pack_forget()
     #path_label.pack_forget()
     #ath_textbox.pack_forget()
@@ -70,6 +71,7 @@ def upload_file():
 
 def no_config_file():
     upload_button.pack_forget()
+    no_config_button.pack_forget()
     #path_label.pack_forget()
     #ath_textbox.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
@@ -80,16 +82,25 @@ def begin_simulation():
     notebook.pack_forget()
     begin_simulation_button.pack_forget()
     reset_simulation_button.pack(padx=5, pady=5)
-    fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, tree_simulator)
+    result = fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, tree_simulator)
+    if not result:
+        reset_simulation()
 
 def reset_simulation():
     simulator.reset()
     update_chart_button.pack_forget()
     reset_simulation_button.pack_forget()
     notebook.pack_forget()
+    task_id_textbox.delete("1.0", tk.END)
+    task_color_textbox.delete("1.0", tk.END)
+    task_admission_textbox.delete("1.0", tk.END)
+    task_duration_textbox.delete("1.0", tk.END)
+    task_priority_textbox.delete("1.0", tk.END)
+    task_event_list_textbox.delete("1.0", tk.END)
     #path_label.pack(padx=5)
     #path_textbox.pack(padx=10, pady=10) 
     upload_button.pack(padx=5, pady=5)
+    no_config_button.pack(padx=5, pady=5)
 
 image = tk.PhotoImage(file="images/logo.png")
 
@@ -147,9 +158,7 @@ automatic_execution_button = tk.Radiobutton(
     )
 automatic_execution_button.pack(anchor="w", padx=20, pady=5)
 
-
 table_width = 1
-
 # table for storing algorithm and quantum
 frame_table_simulator = ttk.Frame(general_settings_tab)
 frame_table_simulator.pack(fill=tk.BOTH, expand=True)

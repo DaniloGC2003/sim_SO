@@ -116,7 +116,8 @@ class OS_Simulator:
         self.algorithm = ""
         self.quantum = 0
         self.tasks = []
-        self.scheduler.reset()
+        if self.scheduler is not None:
+            self.scheduler.reset()
 
         self.fig = None
         self.ax = None
