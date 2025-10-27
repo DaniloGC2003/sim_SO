@@ -17,6 +17,17 @@ root.title("OS simulator")
 root.minsize(1206, 500)
 root.config(background=GUI_MAIN_COLOR)
 
+def add_task():
+    tree.insert("",
+                "end", values=(
+                    task_id_textbox.get("1.0", tk.END).strip(),
+                    task_color_textbox.get("1.0", tk.END).strip(),
+                    task_admission_textbox.get("1.0", tk.END).strip(),
+                    task_duration_textbox.get("1.0", tk.END).strip(),
+                    task_priority_textbox.get("1.0", tk.END).strip(),
+                    task_event_list_textbox.get("1.0", tk.END).strip()
+                ))
+
 def remove_task():
     task_to_be_removed = remove_task_textbox.get("1.0", tk.END).strip()
     for row_id in tree.get_children():
@@ -57,6 +68,14 @@ def upload_file():
     begin_simulation_button.pack(padx=5, pady=5)
     fu.configure_file(caminho, tree, tree_simulator)
 
+def no_config_file():
+    upload_button.pack_forget()
+    #path_label.pack_forget()
+    #ath_textbox.pack_forget()
+    notebook.pack(expand=True, fill="both", padx=5, pady=5)
+    begin_simulation_button.pack(padx=5, pady=5)
+    fu.configure_file("", tree, tree_simulator)
+
 def begin_simulation():
     notebook.pack_forget()
     begin_simulation_button.pack_forget()
@@ -96,6 +115,8 @@ path_textbox.pack(padx=10, pady=10) '''
 
 upload_button = tk.Button(tools_frame, text="Upload config file", command=upload_file)
 upload_button.pack(padx=5, pady=5)
+no_config_button = tk.Button(tools_frame, text="Begin from scratch", command=no_config_file)
+no_config_button.pack(padx=5, pady=5)
 begin_simulation_button = tk.Button(tools_frame, text="Begin simulation", 
                           command=begin_simulation)
 reset_simulation_button = tk.Button(tools_frame, text = "Reset simulation", command=reset_simulation)
@@ -144,7 +165,7 @@ tree_simulator.bind("<Double-1>", edit_cell_simulator)
 notebook.add(general_settings_tab, text="General Settings")
 
 # Tasks tab
-tasks_tab = tk.Frame(notebook, bg="lightgreen")
+tasks_tab = tk.Frame(notebook)
 tasks_var = tk.StringVar(value="None")
 
 # table for storing task configs
@@ -157,14 +178,81 @@ scroll_y = ttk.Scrollbar(frame_table, orient=tk.VERTICAL, command=tree.yview)
 scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
 tree.configure(yscrollcommand=scroll_y.set)
 
+add_task_frame = tk.Frame(tasks_tab)
+add_task_frame.pack()
+add_task_label = tk.Label(
+    add_task_frame,
+    text="Add task:"
+)
+add_task_label.pack(padx=5, pady=5)
+
+task_id_color_frame = tk.Frame(add_task_frame)
+task_id_color_frame.pack(anchor='w')
+task_id_label = tk.Label(
+    task_id_color_frame,
+    text="Task ID: "
+)
+task_id_label.pack(padx=5, side="left")
+task_id_textbox = tk.Text(task_id_color_frame, height=1, width=5)
+task_id_textbox.pack(padx=5, side="left") 
+
+task_color_label = tk.Label(
+    task_id_color_frame,
+    text="Task color: "
+)
+task_color_label.pack(padx=5, side="left")
+task_color_textbox = tk.Text(task_id_color_frame, height=1, width=10)
+task_color_textbox.pack(padx=5, side="left")
+
+task_admission_duration_priority_frame = tk.Frame(add_task_frame)
+task_admission_duration_priority_frame.pack(anchor='w')
+task_admission_label = tk.Label(
+    task_admission_duration_priority_frame,
+    text="Task admission time: "
+)
+task_admission_label.pack(padx=5, pady=5, side="left")
+task_admission_textbox = tk.Text(task_admission_duration_priority_frame, height=1, width=5)
+task_admission_textbox.pack(padx=5, side="left")
+
+task_duration_label = tk.Label(
+    task_admission_duration_priority_frame,
+    text="Task duration: "
+)
+task_duration_label.pack(padx=5, pady=5, side="left")
+task_duration_textbox = tk.Text(task_admission_duration_priority_frame, height=1, width=5)
+task_duration_textbox.pack(padx=5, side="left")
+
+task_priority_label = tk.Label(
+    task_admission_duration_priority_frame,
+    text="Task priority: "
+)
+task_priority_label.pack(padx=5, pady=5, side="left")
+task_priority_textbox = tk.Text(task_admission_duration_priority_frame, height=1, width=5)
+task_priority_textbox.pack(padx=5, side="left")
+
+task_event_list_frame = tk.Frame(add_task_frame)
+task_event_list_frame.pack(anchor='w')
+task_event_list_label = tk.Label(
+    task_event_list_frame,
+    text="Task event_list: "
+)
+task_event_list_label.pack(padx=5, pady=5, side="left")
+task_event_list_textbox = tk.Text(task_event_list_frame, height=3, width=40)
+task_event_list_textbox.pack(padx=10, side="right")
+
+
+
+add_task_button = tk.Button(add_task_frame, text="Add task", command=add_task)
+add_task_button.pack(padx=5, pady=5)
+
 remove_task_frame = tk.Frame(tasks_tab)
 remove_task_frame.pack()
 remove_task_label = tk.Label(
     remove_task_frame,
-    text="Remove task:"
+    text="Remove task (enter task ID):"
 )
 remove_task_label.pack(padx=5, pady=5, side="left")
-remove_task_textbox = tk.Text(remove_task_frame, height=1, width=30)
+remove_task_textbox = tk.Text(remove_task_frame, height=1, width=5)
 remove_task_textbox.pack(padx=10, pady=10, side="left") 
 remove_task_button = tk.Button(remove_task_frame, text="Remove task", command=remove_task)
 remove_task_button.pack(padx=5, pady=5)

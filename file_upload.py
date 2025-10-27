@@ -1,7 +1,6 @@
 import classes as cl
 import tkinter as tk
-from tkinter import filedialog
-import pandas as pd
+from tkinter import messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from utils import *
@@ -41,48 +40,41 @@ def edit_cell(event, tree):
     entry.bind("<FocusOut>", save)
 
 def configure_file(filename, tree, tree_simulator):
-    if validate_file(filename):
-        for item in tree.get_children():
-            tree.delete(item)
-        for item in tree_simulator.get_children():
-            tree_simulator.delete(item)
-        with open(filename, "r", encoding="utf-8") as f:
-            lines = [line.strip() for line in f if line.strip()]
-        algoritmo, quantum = lines[0].split(";")
+    if filename != "":
+        if validate_file(filename):
+            for item in tree.get_children():
+                tree.delete(item)
+            for item in tree_simulator.get_children():
+                tree_simulator.delete(item)
+            with open(filename, "r", encoding="utf-8") as f:
+                lines = [line.strip() for line in f if line.strip()]
+            algoritmo, quantum = lines[0].split(";")
 
-        colunas_simulator = ["algorithm", "quantum"]
-        tree_simulator["columns"] = colunas_simulator
-        tree_simulator["show"] = "headings"
+            colunas_simulator = ["algorithm", "quantum"]
+            tree_simulator["columns"] = colunas_simulator
+            tree_simulator["show"] = "headings"
 
-        colunas = ["id", "cor", "ingresso", "duracao", "prioridade", "lista_eventos"]
-        tree["columns"] = colunas
-        tree["show"] = "headings"
+            colunas = ["id", "cor", "ingresso", "duracao", "prioridade", "lista_eventos"]
+            tree["columns"] = colunas
+            tree["show"] = "headings"
 
-        for col in colunas:
-            tree.heading(col, text=col.capitalize())
-            tree.column(col, width=50, anchor="center")
-        for col in colunas_simulator:
-            tree_simulator.heading(col, text=col.capitalize())
-            tree_simulator.column(col, width=100, anchor="center")
+            for col in colunas:
+                tree.heading(col, text=col.capitalize())
+                tree.column(col, width=50, anchor="center")
+            for col in colunas_simulator:
+                tree_simulator.heading(col, text=col.capitalize())
+                tree_simulator.column(col, width=100, anchor="center")
 
-        for line in lines[1:]:
-            valores = line.split(";")
-            if len(valores) == len(colunas):
-                tree.insert("", "end", values=valores)
-        values_simulator = lines[0].split(";")
-        tree_simulator.insert("", "end", values=values_simulator)
-    else:
-        print("Bad config file")
+            for line in lines[1:]:
+                valores = line.split(";")
+                if len(valores) == len(colunas):
+                    tree.insert("", "end", values=valores)
+            values_simulator = lines[0].split(";")
+            tree_simulator.insert("", "end", values=values_simulator)
+        else:
+            print("Bad config file")
 
 def validate_table(tree, tree_simulator):
-    """
-    Validates the data inside two Tkinter Treeviews:
-    - tree_simulator: contains one row with [algorithm, quantum]
-    - tree: contains multiple rows with [id, color, arrival, duration, priority, event_list]
-
-    Returns True if valid, False otherwise.
-    """
-
     # ====== Validate simulator info ======
     sim_rows = tree_simulator.get_children()
     if len(sim_rows) == 0:
@@ -251,3 +243,5 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
         elif simulation_mode.get() == AUTOMATIC_EXECUTION:
             while os_simulator.simulation_finished == False:
                 os_simulator.update_chart()
+    else:
+        messagebox.showerror("Error", "Please make sure the table contains only valid data")
