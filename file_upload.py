@@ -41,13 +41,12 @@ def edit_cell(event, tree):
     entry.bind("<FocusOut>", save)
 
 def configure_file(filename, tree, tree_simulator):
-    path = "config_files/" + filename + ".txt"
     if validate_file(filename):
         for item in tree.get_children():
             tree.delete(item)
         for item in tree_simulator.get_children():
             tree_simulator.delete(item)
-        with open(path, "r", encoding="utf-8") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
         algoritmo, quantum = lines[0].split(";")
 
@@ -141,9 +140,8 @@ def validate_table(tree, tree_simulator):
     return True
 
 def validate_file(filename):
-    path = "config_files/" + filename + ".txt"
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
         print("File not found.")

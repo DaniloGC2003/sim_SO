@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 import file_upload as fu
 import classes as cl
 import sys
@@ -18,7 +18,6 @@ root.minsize(1206, 500)
 root.config(background=GUI_MAIN_COLOR)
 
 def remove_task():
-    tasks = []
     task_to_be_removed = remove_task_textbox.get("1.0", tk.END).strip()
     for row_id in tree.get_children():
         task = tree.item(row_id, "values")
@@ -43,12 +42,20 @@ def on_close():
     sys.exit()       # Ensures the Python process stops
 
 def upload_file():
+    caminho = filedialog.askopenfilename(
+        title="Upload config .txt file",
+        filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+    )
+    if not caminho:
+        return
+    print(caminho)
+    
     upload_button.pack_forget()
-    path_label.pack_forget()
-    path_textbox.pack_forget()
+    #path_label.pack_forget()
+    #ath_textbox.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
     begin_simulation_button.pack(padx=5, pady=5)
-    fu.configure_file(path_textbox.get("1.0", tk.END).strip(), tree, tree_simulator)
+    fu.configure_file(caminho, tree, tree_simulator)
 
 def begin_simulation():
     notebook.pack_forget()
@@ -61,8 +68,8 @@ def reset_simulation():
     update_chart_button.pack_forget()
     reset_simulation_button.pack_forget()
     notebook.pack_forget()
-    path_label.pack(padx=5)
-    path_textbox.pack(padx=10, pady=10) 
+    #path_label.pack(padx=5)
+    #path_textbox.pack(padx=10, pady=10) 
     upload_button.pack(padx=5, pady=5)
 
 image = tk.PhotoImage(file="images/logo.png")
@@ -80,12 +87,12 @@ tk.Label(
 
 thumbnail_image = image.subsample(5, 5)
 #tk.Label(tools_frame, image=thumbnail_image).pack(padx=5, pady=5)
-
+'''
 path_label = tk.Label(tools_frame, text=".txt config file inside config_files folder:", bg=GUI_TAB_COLOR)
 path_label.pack(padx=5)
 path_textbox = tk.Text(tools_frame, height=1, width=30)
 path_textbox.insert(tk.END, "ex1")
-path_textbox.pack(padx=10, pady=10) 
+path_textbox.pack(padx=10, pady=10) '''
 
 upload_button = tk.Button(tools_frame, text="Upload config file", command=upload_file)
 upload_button.pack(padx=5, pady=5)
