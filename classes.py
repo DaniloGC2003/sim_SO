@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import queue as q
 from utils import *
+import os
 
 
 class Scheduler:
@@ -178,6 +179,9 @@ class OS_Simulator:
         if len(self.finished_tasks) == len(self.tasks):
             print("Simulation finished")
             if self.simulation_finished == False:
+                if not os.path.isdir("./image_output"):
+                    os.makedirs("./image_output")
+                    print("creating dir")
                 self.fig.savefig("image_output/output.png")
                 print("Saving image")
             self.simulation_finished = True
