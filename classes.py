@@ -28,6 +28,11 @@ class Scheduler:
     def exec(self, tasks, current_time):
         if self.algorithm == "FCFS":
             self.current_task = self.step_FCFS(tasks, current_time)
+        elif self.algorithm == "SRTF":
+            self.current_task = self.step_SRTF(tasks, current_time)
+        elif self.algorithm == "PRIO":
+            self.current_task = self.step_Priority(tasks, current_time)
+
         self.quantum_timer = self.quantum_timer + 1
         if self.quantum_timer == self.quantum:
             self.quantum_timer = 0
@@ -87,6 +92,110 @@ class Scheduler:
         print('returning: ' + self.current_task.name if self.current_task else "returning None")
         return self.current_task
 
+    def step_SRTF(self, tasks, current_time):
+        # Initialize remaining_time for new tasks if not already done
+        for t in tasks:
+            if t.start == current_time and not hasattr(t, "remaining_time"):
+                t.remaining_time = t.duration
+
+        # Add any newly arrived tasks to ready queue
+        new_tasks = [t for t in tasks if t.start == current_time]
+        for t in new_tasks:
+            print(f"enqueuing new task: {t.name}")
+            self.execution_queue.put(t)
+
+        # Rebuild the ready queue as a list to allow sorting
+        ready_list = []
+        while not self.execution_queue.empty():
+            ready_list.append(self.execution_queue.get())
+
+        # If current task exists and has remaining time > 0, put it back in the list
+        if self.current_task is not None and self.current_task.remaining_time > 0:
+            ready_list.append(self.current_task)
+
+        # Remove finished tasks
+        ready_list = [t for t in ready_list if t.remaining_time > 0]
+
+        # Sort by shortest remaining time
+        ready_list.sort(key=lambda x: x.remaining_time)
+
+        # Pick the next task
+        if len(ready_list) > 0:
+            next_task = ready_list[0]
+        else:
+            next_task = None
+
+        # Save back to queue
+        for t in ready_list:
+            self.execution_queue.put(t)
+
+        if next_task != self.current_task:
+            if self.current_task is not None and next_task is not None:
+                print(f"Preempting {self.current_task.name} for {next_task.name}")
+            elif self.current_task is not None and next_task is None:
+                print(f"Task {self.current_task.name} completed, no next task.")
+            self.current_task = next_task
+
+        # Decrease remaining time of the current task
+        if self.current_task is not None:
+            self.current_task.remaining_time -= 1
+            if self.current_task.remaining_time == 0:
+                self.current_task.end = current_time + 1
+                print(f"Task {self.current_task.name} finished at time {self.current_task.end}")
+
+        print(f"SRTF selected - running: {self.current_task.name if self.current_task else 'None'}")
+        return self.current_task
+    
+    def step_Priority(self, tasks, current_time):
+        # Add newly arrived tasks
+        for t in tasks:
+            if t.start == current_time:
+                print(f"Enqueuing task: {t.name} (priority {t.priority})")
+                if not hasattr(t, "remaining_time"):
+                    t.remaining_time = t.duration
+                self.execution_queue.put(t)
+
+        # Build a list from the queue
+        ready_list = []
+        while not self.execution_queue.empty():
+            ready_list.append(self.execution_queue.get())
+
+        # Reinsert current task if still running and not finished
+        if self.current_task is not None and self.current_task.end == float('inf') and self.current_task not in ready_list:
+            ready_list.append(self.current_task)
+
+        # Remove finished tasks
+        ready_list = [t for t in ready_list if t.end == float('inf')]
+
+        # Sort by priority (higher = more important)
+        ready_list.sort(key=lambda t: t.priority, reverse=True)
+
+        # Select next task
+        next_task = ready_list[0] if ready_list else None
+
+        # Restore the ready queue
+        for t in ready_list:
+            self.execution_queue.put(t)
+
+        # Handle preemption
+        if next_task != self.current_task:
+            if self.current_task is not None and next_task is not None:
+                print(f"Preempting {self.current_task.name} for {next_task.name}")
+            elif self.current_task is not None and next_task is None:
+                print(f"Task {self.current_task.name} completed, no next task.")
+            self.current_task = next_task
+
+        # Execute 1 time unit
+        if self.current_task is not None:
+            self.current_task.moments_in_execution.append(current_time)
+            self.current_task.remaining_time -= 1
+
+            if self.current_task.remaining_time <= 0:
+                self.current_task.end = current_time + 1
+                print(f"Task {self.current_task.name} finished at time {self.current_task.end}")
+
+        print(f"PRIORITY selected - running: {self.current_task.name if self.current_task else 'None'}")
+        return self.current_task
 
 class OS_Simulator:
     def __init__(self):
@@ -118,7 +227,6 @@ class OS_Simulator:
         self.tasks = []
         if self.scheduler is not None:
             self.scheduler.reset()
-
         self.fig = None
         self.ax = None
         self.canvas = None
@@ -133,6 +241,10 @@ class OS_Simulator:
         self.finished_tasks = []
         self.simulation_finished = False
         self.simulation_mode = ""
+
+        for t in self.tasks:
+            if hasattr(t, "remaining_time"):
+                delattr(t, "remaining_time")
         
     def print_self(self):
         print(f"Algorithm: {self.algorithm}, Quantum: {self.quantum}")
@@ -150,9 +262,15 @@ class OS_Simulator:
         if len(self.finished_tasks) < len(self.tasks):
             self.current_time += 1
         if next_task is not None:
-            if len(next_task.moments_in_execution) == next_task.duration: # Task finished
-                next_task.end = self.current_time
-                self.finished_tasks.append(next_task)
+            # Check if the task just finished
+            if hasattr(next_task, "remaining_time"):  # For SRTF or similar algorithms
+                if next_task.remaining_time == 0 and next_task not in self.finished_tasks:
+                    next_task.end = self.current_time
+                    self.finished_tasks.append(next_task)
+            else:  # For FCFS or non-preemptive algorithms
+                if len(next_task.moments_in_execution) == next_task.duration:
+                    next_task.end = self.current_time
+                    self.finished_tasks.append(next_task)
     
         # plot chart
         if self.simulation_mode == MANUAL_EXECUTION or len(self.finished_tasks) == len(self.tasks):
