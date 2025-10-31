@@ -67,7 +67,7 @@ def upload_file():
     #ath_textbox.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
     begin_simulation_button.pack(padx=5, pady=5)
-    fu.configure_file(caminho, tree, tree_simulator)
+    fu.configure_file(caminho, tree, tree_simulator, selected_dropdown, os_quantum_entry)
 
 def no_config_file():
     upload_button.pack_forget()
@@ -82,7 +82,7 @@ def begin_simulation():
     notebook.pack_forget()
     begin_simulation_button.pack_forget()
     reset_simulation_button.pack(padx=5, pady=5)
-    result = fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, tree_simulator)
+    result = fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, tree_simulator, selected_dropdown.get(), os_quantum_entry.get())
     if not result:
         reset_simulation()
 
@@ -102,7 +102,6 @@ def reset_simulation():
     upload_button.pack(padx=5, pady=5)
     no_config_button.pack(padx=5, pady=5)
 
-image = tk.PhotoImage(file="images/logo.png")
 
 # Tools frame
 tools_frame = tk.Frame(root, bg=GUI_TAB_COLOR)
@@ -115,7 +114,6 @@ tk.Label(
     width=50
 ).pack(padx=5, pady=5)
 
-thumbnail_image = image.subsample(5, 5)
 #tk.Label(tools_frame, image=thumbnail_image).pack(padx=5, pady=5)
 '''
 path_label = tk.Label(tools_frame, text=".txt config file inside config_files folder:", bg=GUI_TAB_COLOR)
@@ -165,9 +163,18 @@ frame_table_simulator.pack(fill=tk.BOTH, expand=True)
 tree_simulator = ttk.Treeview(frame_table_simulator)
 tree_simulator.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 tree_simulator.bind("<Double-1>", edit_cell_simulator)
-#scroll_y = ttk.Scrollbar(frame_table_simulator, orient=tk.VERTICAL, command=tree_simulator.yview)
-#scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
-#tree_simulator.configure(yscrollcommand=scroll_y.set)
+selected_dropdown = tk.StringVar()
+selected_dropdown.set("FCFS")
+options = ["FCFS", "SRTF", "PRIO"]
+dropwdown = tk.OptionMenu(general_settings_tab, selected_dropdown, *options) # * unpacks the list
+dropwdown.pack(padx=5, pady=5, anchor='w')
+os_quantum_label = tk.Label(
+    general_settings_tab,
+    text="OS quantum: "
+)
+os_quantum_label.pack(padx=5, anchor='w')
+os_quantum_entry = tk.Entry(general_settings_tab)
+os_quantum_entry.pack(padx=5, pady=5, anchor='w')
 
 
 
@@ -282,17 +289,6 @@ notebook.add(tasks_tab, text="Tasks")
 image_frame = tk.Frame(root, bg=GUI_MAIN_COLOR)
 image_frame.pack(padx=5, pady=5, side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-display_image = image.subsample(2, 2)
-'''
-tk.Label(
-    image_frame,
-    text="Image",
-    bg="grey",
-    fg="white",
-).pack(padx=5, pady=5)
-
-tk.Label(image_frame, image=display_image).pack(padx=5, pady=5)
-'''
 
 # Make sure the program is terminated after closing the window
 root.protocol("WM_DELETE_WINDOW", on_close)

@@ -39,7 +39,7 @@ def edit_cell(event, tree):
     entry.bind("<Escape>", cancel_writing)
     entry.bind("<FocusOut>", save)
 
-def configure_file(filename, tree, tree_simulator):
+def configure_file(filename, tree, tree_simulator, selected_dropdown, os_quantum_entry):
     for item in tree.get_children():
             tree.delete(item)
     for item in tree_simulator.get_children():
@@ -65,38 +65,25 @@ def configure_file(filename, tree, tree_simulator):
         if validate_file(filename):
             with open(filename, "r", encoding="utf-8") as f:
                 lines = [line.strip() for line in f if line.strip()]
-                if filename != "":
-                    for line in lines[1:]:
-                        valores = line.split(";")
-                        if len(valores) == len(colunas):
-                            tree.insert("", "end", values=valores)
-                    values_simulator = lines[0].split(";")
-                    tree_simulator.insert("", "end", values=values_simulator)
+                values_simulator = lines[0].split(";")
+                for line in lines[1:]:
+                    valores = line.split(";")
+                    if len(valores) == len(colunas):
+                        tree.insert("", "end", values=valores)
+                tree_simulator.insert("", "end", values=values_simulator)
+                selected_dropdown.set(values_simulator[0])
+                os_quantum_entry.delete(0, tk.END)
+                os_quantum_entry.insert(0, values_simulator[1])
     else:
         tree_simulator.insert("", "end", values=["-", "-"])
 
-def validate_table(tree, tree_simulator):
-    # ====== Validate simulator info ======
-    sim_rows = tree_simulator.get_children()
-    if len(sim_rows) == 0:
-        print("Error: Simulator table is empty.")
-        return False
-
-    # Expect exactly one row (algorithm, quantum)
-    sim_values = tree_simulator.item(sim_rows[0], "values")
-    if len(sim_values) != 2:
-        print("Error: Simulator table must contain two columns: algorithm and quantum.")
-        return False
-
-    algorithm, quantum = sim_values
-    if not algorithm.isalpha():
-        print(f"Error: Invalid algorithm '{algorithm}'. Must contain only letters.")
-        return False
+def validate_table(tree, tree_simulator, quantum):
+    # Validate quantum
     if not quantum.isdigit() or int(quantum) <= 0:
         print(f"Error: Invalid quantum '{quantum}'. Must be a positive integer.")
         return False
 
-    # ====== Validate tasks ======
+    # Validate tasks
     task_rows = tree.get_children()
     if len(task_rows) == 0:
         print("Error: Task table is empty.")
@@ -186,10 +173,10 @@ def validate_file(filename):
     print("Valid file")
     return True
 
-def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, tree_simulator):
+def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, tree_simulator, algorithm, quantum):
     print("Beginning simulation.")
     # Make sure data in tables is valid (user might have added invalid data through the GUI)
-    if validate_table(tree, tree_simulator):
+    if validate_table(tree, tree_simulator, quantum):
         simulation_lines = []
 
         # Retrieve tasks
