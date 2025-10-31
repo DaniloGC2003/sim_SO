@@ -1,5 +1,6 @@
 import queue as q
 from utils import *
+from tkinter import messagebox
 import os
 
 
@@ -298,6 +299,8 @@ class OS_Simulator:
                     print("creating dir")
                 self.fig.savefig("image_output/output.png")
                 print("Saving image")
+                messagebox.showinfo("Simulation finished!", "Simulation finished! The output image has been saved as ./image_output/output.png")
+
             self.simulation_finished = True
         
         print()
