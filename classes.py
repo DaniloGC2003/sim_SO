@@ -252,7 +252,7 @@ class OS_Simulator:
             print(f"Task: {task.name}, Color: {task.color}, Start: {task.start}, Duration: {task.duration}, Priority: {task.priority}, Events: {task.event_list}")
 
 
-    def update_chart(self):
+    def update_chart(self, update_chart_button):
         print("current time: " + str(self.current_time))
         next_task = self.scheduler.exec(self.tasks, self.current_time)
         if next_task is not None:    
@@ -290,6 +290,7 @@ class OS_Simulator:
             self.canvas.draw()
 
         if len(self.finished_tasks) == len(self.tasks):
+            update_chart_button.pack_forget()
             print("Simulation finished")
             if self.simulation_finished == False:
                 if not os.path.isdir("./image_output"):

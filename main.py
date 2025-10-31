@@ -36,10 +36,6 @@ def remove_task():
             tree.delete(row_id)
 
 # Called after double-clicking on a cell
-def edit_cell_simulator(event):
-    fu.edit_cell(event, tree_simulator)
-
-# Called after double-clicking on a cell
 def edit_cell(event):
     fu.edit_cell(event, tree)
 
@@ -67,7 +63,7 @@ def upload_file():
     #ath_textbox.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
     begin_simulation_button.pack(padx=5, pady=5)
-    fu.configure_file(caminho, tree, tree_simulator, selected_dropdown, os_quantum_entry)
+    fu.configure_file(caminho, tree, selected_dropdown, os_quantum_entry)
 
 def no_config_file():
     upload_button.pack_forget()
@@ -76,13 +72,13 @@ def no_config_file():
     #ath_textbox.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
     begin_simulation_button.pack(padx=5, pady=5)
-    fu.configure_file("", tree, tree_simulator)
+    fu.configure_file("", tree, selected_dropdown, os_quantum_entry)
 
 def begin_simulation():
     notebook.pack_forget()
     begin_simulation_button.pack_forget()
     reset_simulation_button.pack(padx=5, pady=5)
-    result = fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, tree_simulator, selected_dropdown.get(), os_quantum_entry.get())
+    result = fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, selected_dropdown.get(), os_quantum_entry.get())
     if not result:
         reset_simulation()
 
@@ -130,13 +126,13 @@ begin_simulation_button = tk.Button(tools_frame, text="Begin simulation",
                           command=begin_simulation)
 reset_simulation_button = tk.Button(tools_frame, text = "Reset simulation", command=reset_simulation)
 update_chart_button = tk.Button(tools_frame, text = "Update chart", 
-                                command=lambda: simulator.update_chart())
+                                command=lambda: simulator.update_chart(update_chart_button))
 
 # Tools and Filters tabs
 notebook = ttk.Notebook(tools_frame)
 
 # General settings tab
-general_settings_tab = tk.Frame(notebook, bg=GUI_TAB_COLOR)
+general_settings_tab = tk.Frame(notebook)
 general_settings_var = tk.StringVar(value=MANUAL_EXECUTION)
 
 manual_execution_button = tk.Radiobutton(
@@ -144,7 +140,6 @@ manual_execution_button = tk.Radiobutton(
         text=MANUAL_EXECUTION,
         variable=general_settings_var,
         value=MANUAL_EXECUTION,
-        bg=GUI_TAB_COLOR,
     )
 manual_execution_button.pack(anchor="w", padx=20, pady=5)
 automatic_execution_button = tk.Radiobutton(
@@ -152,17 +147,21 @@ automatic_execution_button = tk.Radiobutton(
         text=AUTOMATIC_EXECUTION,
         variable=general_settings_var,
         value=AUTOMATIC_EXECUTION,
-        bg=GUI_TAB_COLOR,
     )
 automatic_execution_button.pack(anchor="w", padx=20, pady=5)
 
 table_width = 1
 # table for storing algorithm and quantum
-frame_table_simulator = ttk.Frame(general_settings_tab)
-frame_table_simulator.pack(fill=tk.BOTH, expand=True)
-tree_simulator = ttk.Treeview(frame_table_simulator)
-tree_simulator.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-tree_simulator.bind("<Double-1>", edit_cell_simulator)
+#frame_table_simulator = ttk.Frame(general_settings_tab)
+#frame_table_simulator.pack(fill=tk.BOTH, expand=True)
+#tree_simulator = ttk.Treeview(frame_table_simulator)
+#tree_simulator.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+#tree_simulator.bind("<Double-1>", edit_cell_simulator)
+os_alg_label = tk.Label(
+    general_settings_tab,
+    text="OS algorithm: "
+)
+os_alg_label.pack(padx=5, anchor='w')
 selected_dropdown = tk.StringVar()
 selected_dropdown.set("FCFS")
 options = ["FCFS", "SRTF", "PRIO"]

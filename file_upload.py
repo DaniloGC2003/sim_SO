@@ -39,15 +39,10 @@ def edit_cell(event, tree):
     entry.bind("<Escape>", cancel_writing)
     entry.bind("<FocusOut>", save)
 
-def configure_file(filename, tree, tree_simulator, selected_dropdown, os_quantum_entry):
+def configure_file(filename, tree, selected_dropdown, os_quantum_entry):
+
     for item in tree.get_children():
             tree.delete(item)
-    for item in tree_simulator.get_children():
-        tree_simulator.delete(item)
-
-    colunas_simulator = ["algorithm", "quantum"]
-    tree_simulator["columns"] = colunas_simulator
-    tree_simulator["show"] = "headings"
 
     colunas = ["id", "cor", "ingresso", "duracao", "prioridade", "lista_eventos"]
     tree["columns"] = colunas
@@ -56,9 +51,7 @@ def configure_file(filename, tree, tree_simulator, selected_dropdown, os_quantum
     for col in colunas:
         tree.heading(col, text=col.capitalize())
         tree.column(col, width=50, anchor="center")
-    for col in colunas_simulator:
-        tree_simulator.heading(col, text=col.capitalize())
-        tree_simulator.column(col, width=100, anchor="center")
+
     # Check if data format is valid
     
     if filename != "":
@@ -70,14 +63,15 @@ def configure_file(filename, tree, tree_simulator, selected_dropdown, os_quantum
                     valores = line.split(";")
                     if len(valores) == len(colunas):
                         tree.insert("", "end", values=valores)
-                tree_simulator.insert("", "end", values=values_simulator)
                 selected_dropdown.set(values_simulator[0])
                 os_quantum_entry.delete(0, tk.END)
                 os_quantum_entry.insert(0, values_simulator[1])
     else:
-        tree_simulator.insert("", "end", values=["-", "-"])
+        selected_dropdown.set("FCFS")
+        os_quantum_entry.delete(0, tk.END)
+        os_quantum_entry.insert(0, "2")
 
-def validate_table(tree, tree_simulator, quantum):
+def validate_table(tree, quantum):
     # Validate quantum
     if not quantum.isdigit() or int(quantum) <= 0:
         print(f"Error: Invalid quantum '{quantum}'. Must be a positive integer.")
@@ -173,10 +167,10 @@ def validate_file(filename):
     print("Valid file")
     return True
 
-def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, tree_simulator, algorithm, quantum):
+def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, algorithm, quantum):
     print("Beginning simulation.")
     # Make sure data in tables is valid (user might have added invalid data through the GUI)
-    if validate_table(tree, tree_simulator, quantum):
+    if validate_table(tree, quantum):
         simulation_lines = []
 
         # Retrieve tasks
@@ -184,11 +178,8 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
             simulation_lines.append(tree.item(row_id, "values"))
 
         # Retrieve algorithm and quantum and store into os_simulator
-        os_data = []
-        os_data = tree_simulator.item(tree_simulator.get_children()[0], "values")
-        print(os_data)
-        os_simulator.algorithm = os_data[0]
-        os_simulator.quantum = int(os_data[1])
+        os_simulator.algorithm = algorithm
+        os_simulator.quantum = quantum
         os_simulator.simulation_mode = simulation_mode.get()
 
 
@@ -234,7 +225,7 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
             chart_button.pack(padx = 5, pady = 5)
         elif simulation_mode.get() == AUTOMATIC_EXECUTION:
             while os_simulator.simulation_finished == False:
-                os_simulator.update_chart()
+                os_simulator.update_chart(chart_button)
 
         return True
 
