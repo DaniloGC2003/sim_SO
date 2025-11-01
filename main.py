@@ -14,7 +14,7 @@ simulator = cl.OS_Simulator()
 # Root window initial setup
 root = tk.Tk()
 root.title("OS simulator")
-root.minsize(1206, 500)
+root.minsize(1206, 559)
 root.config(background=GUI_MAIN_COLOR)
 
 def add_task():
@@ -107,7 +107,8 @@ tk.Label(
     tools_frame,
     text="OS scheduler simulator",
     bg=GUI_TAB_COLOR,
-    width=50
+    #width=50,
+    font=("Arial", 16, "bold")
 ).pack(padx=5, pady=5)
 
 #tk.Label(tools_frame, image=thumbnail_image).pack(padx=5, pady=5)
