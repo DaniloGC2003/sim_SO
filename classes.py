@@ -34,6 +34,8 @@ class Scheduler:
             self.current_task = self.step_SRTF(tasks, current_time)
         elif self.algorithm == "PRIO":
             self.current_task = self.step_Priority(tasks, current_time)
+        
+        # Increment quantum timer. Reset if necessary
         self.quantum_timer = self.quantum_timer + 1
         if self.quantum == self.quantum_timer:
             print("Resetting quantum timer")
@@ -44,7 +46,6 @@ class Scheduler:
 
         return self.current_task
     
-    # Step functions should return the task to be executed
     def step_FCFS(self, tasks, current_time):
         # Enqueue tasks starting at current_time
 
@@ -222,7 +223,7 @@ class OS_Simulator:
         self.simulation_finished = False
         self.simulation_mode = ""
 
-
+    # show messagebox with task data
     def show_task_data(self, task_id):
         for task in self.tasks:
             if task.name == task_id:
@@ -256,6 +257,7 @@ class OS_Simulator:
             if hasattr(t, "remaining_time"):
                 delattr(t, "remaining_time")
         
+    # print OS_Simulator data
     def print_self(self):
         print(f"Algorithm: {self.algorithm}, Quantum: {self.quantum}")
         for task in self.tasks:
@@ -300,6 +302,7 @@ class OS_Simulator:
                         self.ax.barh(task.name, 1, left=i, color="white", edgecolor="black")
             self.canvas.draw()
 
+        # Check if simulation is finished
         if len(self.finished_tasks) == len(self.tasks):
             update_chart_button.pack_forget()
             print("Simulation finished")

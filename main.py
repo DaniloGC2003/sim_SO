@@ -17,10 +17,12 @@ root.title("OS simulator")
 root.minsize(1206, 559)
 root.config(background=GUI_MAIN_COLOR)
 
+# Shows messagebox with task info
 def check_task_info():
     task_id = check_task_info_entry.get()
     simulator.show_task_data(task_id)
 
+# Adds a task to the table
 def add_task():
     tree.insert("",
                 "end", values=(
@@ -32,6 +34,7 @@ def add_task():
                     task_event_list_textbox.get("1.0", tk.END).strip()
                 ))
 
+# Removes a task from the table
 def remove_task():
     task_to_be_removed = remove_task_textbox.get("1.0", tk.END).strip()
     for row_id in tree.get_children():
@@ -52,6 +55,7 @@ def on_close():
     root.destroy()   # Closes Tkinter window
     sys.exit()       # Ensures the Python process stops
 
+# Uploads a config file and fills the table
 def upload_file():
     caminho = filedialog.askopenfilename(
         title="Upload config .txt file",
@@ -63,12 +67,11 @@ def upload_file():
     
     no_config_button.pack_forget()
     upload_button.pack_forget()
-    #path_label.pack_forget()
-    #ath_textbox.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
     begin_simulation_button.pack(padx=5, pady=5)
     fu.configure_file(caminho, tree, selected_dropdown, os_quantum_entry)
 
+# Starts simulation from scratch
 def no_config_file():
     upload_button.pack_forget()
     no_config_button.pack_forget()
@@ -78,6 +81,7 @@ def no_config_file():
     begin_simulation_button.pack(padx=5, pady=5)
     fu.configure_file("", tree, selected_dropdown, os_quantum_entry)
 
+# Begins the simulation
 def begin_simulation():
     notebook.pack_forget()
     begin_simulation_button.pack_forget()
@@ -87,6 +91,7 @@ def begin_simulation():
     if not result:
         reset_simulation()
 
+# Resets all created elements
 def reset_simulation():
     simulator.reset()
     update_chart_button.pack_forget()
@@ -99,8 +104,6 @@ def reset_simulation():
     task_duration_textbox.delete("1.0", tk.END)
     task_priority_textbox.delete("1.0", tk.END)
     task_event_list_textbox.delete("1.0", tk.END)
-    #path_label.pack(padx=5)
-    #path_textbox.pack(padx=10, pady=10) 
     upload_button.pack(padx=5, pady=5)
     no_config_button.pack(padx=5, pady=5)
 
@@ -109,6 +112,7 @@ def reset_simulation():
 tools_frame = tk.Frame(root, bg=GUI_TAB_COLOR)
 tools_frame.pack(padx=5, pady=5, side=tk.LEFT, fill=tk.Y) 
 
+# Title
 tk.Label(
     tools_frame,
     text="OS scheduler simulator",
@@ -116,14 +120,6 @@ tk.Label(
     #width=50,
     font=("Arial", 16, "bold")
 ).pack(padx=5, pady=5)
-
-#tk.Label(tools_frame, image=thumbnail_image).pack(padx=5, pady=5)
-'''
-path_label = tk.Label(tools_frame, text=".txt config file inside config_files folder:", bg=GUI_TAB_COLOR)
-path_label.pack(padx=5)
-path_textbox = tk.Text(tools_frame, height=1, width=30)
-path_textbox.insert(tk.END, "ex1")
-path_textbox.pack(padx=10, pady=10) '''
 
 upload_button = tk.Button(tools_frame, text="Upload config file", command=upload_file)
 upload_button.pack(padx=5, pady=5)
@@ -169,12 +165,6 @@ automatic_execution_button = tk.Radiobutton(
 automatic_execution_button.pack(anchor="w", padx=20, pady=5)
 
 table_width = 1
-# table for storing algorithm and quantum
-#frame_table_simulator = ttk.Frame(general_settings_tab)
-#frame_table_simulator.pack(fill=tk.BOTH, expand=True)
-#tree_simulator = ttk.Treeview(frame_table_simulator)
-#tree_simulator.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-#tree_simulator.bind("<Double-1>", edit_cell_simulator)
 os_alg_label = tk.Label(
     general_settings_tab,
     text="OS algorithm: "
@@ -290,14 +280,6 @@ remove_task_textbox.pack(padx=10, pady=10, side="left")
 remove_task_button = tk.Button(remove_task_frame, text="Remove task", command=remove_task)
 remove_task_button.pack(padx=5, pady=5)
 
-'''for filter in ["Blurring", "Sharpening"]:
-    tk.Radiobutton(
-        tasks_tab,
-        text=filter,
-        variable=tasks_var,
-        value=filter,
-        bg="lightgreen",
-    ).pack(anchor="w", padx=20, pady=5)'''
 notebook.add(tasks_tab, text="Tasks")
 
 
