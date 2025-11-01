@@ -223,6 +223,13 @@ class OS_Simulator:
         self.simulation_mode = ""
 
 
+    def show_task_data(self, task_id):
+        for task in self.tasks:
+            if task.name == task_id:
+                task.show_info()
+                return
+        messagebox.showerror("Error", f"Task {task_id} not found.")
+
     def reset(self):
         print("Resetting OS simulator")
         self.algorithm = ""
@@ -323,3 +330,14 @@ class Task:
     def print_task(self):
         print(f"Task: {self.name}, Color: {self.color}, Start: {self.start}, Duration: {self.duration}, Priority: {self.priority}, Events: {self.event_list}")
         print(f"Moments in execution: {self.moments_in_execution}, End: {self.end}")
+    
+    def show_info(self):
+        info = f"Task Name: {self.name}\n"
+        info += f"Color: {self.color}\n"
+        info += f"Start Time: {self.start}\n"
+        info += f"Duration: {self.duration}\n"
+        info += f"Priority: {self.priority}\n"
+        info += f"Event List: {self.event_list}\n"
+        info += f"Moments in Execution: {self.moments_in_execution}\n"
+        info += f"End Time: {self.end}\n"
+        messagebox.showinfo("Task Information", info)

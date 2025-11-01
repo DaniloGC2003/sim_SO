@@ -17,6 +17,10 @@ root.title("OS simulator")
 root.minsize(1206, 559)
 root.config(background=GUI_MAIN_COLOR)
 
+def check_task_info():
+    task_id = check_task_info_entry.get()
+    simulator.show_task_data(task_id)
+
 def add_task():
     tree.insert("",
                 "end", values=(
@@ -79,6 +83,7 @@ def begin_simulation():
     begin_simulation_button.pack_forget()
     reset_simulation_button.pack(padx=5, pady=5)
     result = fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, selected_dropdown.get(), os_quantum_entry.get())
+    check_task_info_frame.pack(padx=5, pady=5)
     if not result:
         reset_simulation()
 
@@ -86,6 +91,7 @@ def reset_simulation():
     simulator.reset()
     update_chart_button.pack_forget()
     reset_simulation_button.pack_forget()
+    check_task_info_frame.pack_forget()
     notebook.pack_forget()
     task_id_textbox.delete("1.0", tk.END)
     task_color_textbox.delete("1.0", tk.END)
@@ -128,6 +134,17 @@ begin_simulation_button = tk.Button(tools_frame, text="Begin simulation",
 reset_simulation_button = tk.Button(tools_frame, text = "Reset simulation", command=reset_simulation)
 update_chart_button = tk.Button(tools_frame, text = "Update chart", 
                                 command=lambda: simulator.update_chart(update_chart_button))
+check_task_info_frame = tk.Frame(tools_frame, bg=GUI_TAB_COLOR)
+check_task_info_label = tk.Label(
+    check_task_info_frame,
+    text="Enter task ID to check its status: ",
+    bg=GUI_TAB_COLOR
+)
+check_task_info_label.pack(padx=5, anchor='w')
+check_task_info_entry = tk.Entry(check_task_info_frame)
+check_task_info_entry.pack(padx=5, pady=5, side="left")
+check_task_info_button = tk.Button(check_task_info_frame, text = "Check task info", command=check_task_info)
+check_task_info_button.pack(padx=5, pady=5)
 
 # Tools and Filters tabs
 notebook = ttk.Notebook(tools_frame)
