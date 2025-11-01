@@ -179,7 +179,7 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
 
         # Retrieve algorithm and quantum and store into os_simulator
         os_simulator.algorithm = algorithm
-        os_simulator.quantum = quantum
+        os_simulator.quantum = int(quantum)
         os_simulator.simulation_mode = simulation_mode.get()
 
 
@@ -187,7 +187,7 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
         for line in simulation_lines:
             print('creating new task')
             task = cl.Task(line[0], line[1], int(line[2]), int(line[3]), int(line[4]), line[5])
-            print(task.name)
+            task.print_task()
             os_simulator.tasks.append(task)
             os_simulator.total_simulation_time += int(line[3])
         

@@ -27,15 +27,16 @@ class Scheduler:
 
     # Execute 1 step of the simulation
     def exec(self, tasks, current_time):
+        print("scheduler exec")
         if self.algorithm == "FCFS":
             self.current_task = self.step_FCFS(tasks, current_time)
         elif self.algorithm == "SRTF":
             self.current_task = self.step_SRTF(tasks, current_time)
         elif self.algorithm == "PRIO":
             self.current_task = self.step_Priority(tasks, current_time)
-
         self.quantum_timer = self.quantum_timer + 1
-        if self.quantum_timer == self.quantum:
+        if self.quantum == self.quantum_timer:
+            print("Resetting quantum timer")
             self.quantum_timer = 0
             self.preemption_flag = True
         else:
@@ -75,6 +76,7 @@ class Scheduler:
         if self.current_task is not None:
             # Verificar se a tarefa ja acabou
             if self.current_task.end != float('inf'):
+                print("TASK FINISHED")
                 # Reset quantum timer
                 self.quantum_timer = 0
                 # Se ha tarefas para serem executadas na fila
@@ -257,8 +259,9 @@ class OS_Simulator:
         print("current time: " + str(self.current_time))
         next_task = self.scheduler.exec(self.tasks, self.current_time)
         if next_task is not None:    
-            print("Executing task")
+            print("Executing task: ")
             next_task.moments_in_execution.append(self.current_time)
+            next_task.print_task()
         # increment time
         if len(self.finished_tasks) < len(self.tasks):
             self.current_time += 1
@@ -316,3 +319,7 @@ class Task:
 
         self.moments_in_execution = []
         self.end = float('inf')
+    
+    def print_task(self):
+        print(f"Task: {self.name}, Color: {self.color}, Start: {self.start}, Duration: {self.duration}, Priority: {self.priority}, Events: {self.event_list}")
+        print(f"Moments in execution: {self.moments_in_execution}, End: {self.end}")
