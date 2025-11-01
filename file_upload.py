@@ -7,6 +7,7 @@ from utils import *
 import re
 
 def edit_cell(event, tree):
+    # Check if a cell was clicked
     item = tree.identify_row(event.y)
     coluna = tree.identify_column(event.x)
     if not item or not coluna:
@@ -41,6 +42,7 @@ def edit_cell(event, tree):
 
 def configure_file(filename, tree, selected_dropdown, os_quantum_entry):
 
+    # Clear existing data
     for item in tree.get_children():
             tree.delete(item)
 
@@ -48,12 +50,12 @@ def configure_file(filename, tree, selected_dropdown, os_quantum_entry):
     tree["columns"] = colunas
     tree["show"] = "headings"
 
+    # Configure columns
     for col in colunas:
         tree.heading(col, text=col.capitalize())
         tree.column(col, width=50, anchor="center")
 
     # Check if data format is valid
-    
     if filename != "":
         if validate_file(filename):
             with open(filename, "r", encoding="utf-8") as f:
@@ -67,6 +69,7 @@ def configure_file(filename, tree, selected_dropdown, os_quantum_entry):
                 os_quantum_entry.delete(0, tk.END)
                 os_quantum_entry.insert(0, values_simulator[1])
     else:
+        # Add default values
         selected_dropdown.set("FCFS")
         os_quantum_entry.delete(0, tk.END)
         os_quantum_entry.insert(0, "2")
@@ -74,42 +77,59 @@ def configure_file(filename, tree, selected_dropdown, os_quantum_entry):
 def validate_table(tree, quantum):
     # Validate quantum
     if not quantum.isdigit() or int(quantum) <= 0:
+        messagebox.showerror("Error", f"Invalid quantum '{quantum}'. Must be a positive integer.")
         print(f"Error: Invalid quantum '{quantum}'. Must be a positive integer.")
         return False
 
     # Validate tasks
     task_rows = tree.get_children()
     if len(task_rows) == 0:
+        messagebox.showerror("Error", "Task table is empty.")
         print("Error: Task table is empty.")
         return False
 
     color_pattern = re.compile(r"^#[0-9a-fA-F]{6}$")
 
+    task_ids = []
     for i, row_id in enumerate(task_rows, start=1):
         values = tree.item(row_id, "values")
         if len(values) != 6:
+            messagebox.showerror("Error", f"Row {i} has incorrect number of columns ({len(values)}). Expected 6.")
             print(f"Error: Row {i} has incorrect number of columns ({len(values)}). Expected 6.")
             return False
 
         id_, color, arrival, duration, priority, events = values
-
+    
         if not id_:
+            messagebox.showerror("Error", f"Row {i}: ID is empty.")
             print(f"Error: Row {i}: ID is empty.")
             return False
-
+        else:
+            task_ids.append(id_)
+            if id_[0] != 't' or not id_[1:].isdigit() or len(id_[1:]) != 2:
+                messagebox.showerror("Error", f"Row {i}: Invalid ID '{id_}'. Must be in format 'tXX' where XX are two digits.")
+                print(f"Error: Row {i}: Invalid ID '{id_}'. Must be in format 'tXX' where XX are two digits.")
+                return False
         if not color_pattern.match(color):
+            messagebox.showerror("Error", f"Row {i}: Invalid color '{color}'. Must be in #RRGGBB format.")
             print(f"Error: Row {i}: Invalid color '{color}'. Must be in #RRGGBB format.")
             return False
 
         for val, name in [(arrival, "arrival"), (duration, "duration"), (priority, "priority")]:
             if not val.isdigit() or int(val) < 0:
+                messagebox.showerror("Error", f"Row {i}: Invalid '{name}' value '{val}'. Must be a non-negative integer.")
                 print(f"Error: Row {i}: Invalid '{name}' value '{val}'. Must be a non-negative integer.")
                 return False
 
         if events != "-" and not all(e.strip() for e in events.split(",")):
+            messagebox.showerror("Error", f"Row {i}: Invalid event list '{events}'.")
             print(f"Error: Row {i}: Invalid event list '{events}'.")
             return False
-
+    # Check for duplicate IDs
+    if len(task_ids) != len(set(task_ids)): # set function removes duplicates
+        messagebox.showerror("Error", "Duplicate task IDs found in the table.")
+        print("Error: Duplicate task IDs found in the table.")
+        return False
     print("Validation successful: all tables are valid.")
     return True
 
@@ -118,52 +138,72 @@ def validate_file(filename):
         with open(filename, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
+        messagebox.showerror("Error", "File not found.")
         print("File not found.")
         return False
 
     if len(lines) < 2:
+        messagebox.showerror("Error", "File too short. Make sure the file contains at least 2 lines.")
         print("File too short. Make sure the file contains at least 2 lines.")
         return False
 
     # First line (OS settings)
     primeira = lines[0].split(";")
     if len(primeira) != 2:
+        messagebox.showerror("Error", "First line should contain 2 fields: algorithm and quantum.")
         print("First line should contain 2 fields: algorithm and quantum.")
         return False
 
     algoritmo, quantum = primeira
     if not algoritmo.isalpha():
+        messagebox.showerror("Error", "Algorithm should only consist of letters.")
         print("Algorithm should only consist of letters.")
         return False
     if not quantum.isdigit() or int(quantum) <= 0:
+        messagebox.showerror("Error", "Quantum must be a positive integer.")
         print("Quantum must be a positive integer.")
         return False
-
+    task_ids = []
     # Other lines (tasks)
     padrao_cor = re.compile(r"^#[0-9a-fA-F]{6}$")
     for i, line in enumerate(lines[1:], start=2):
         partes = line.split(";")
         if len(partes) != 6:
+            messagebox.showerror("Error", f"Line {i} should contain 6 fields: id, color, ingresso, duracao, prioridade, lista_eventos.")
             print(f"line {i}: not enough fields ({len(partes)}).")
             return False
 
         id_, cor, ingresso, duracao, prioridade, eventos = partes
 
         if not id_:
+            messagebox.showerror("Error", f"Line {i}: ID is empty.")
             print(f"line {i}: ID empty.")
             return False
+        else:
+            task_ids.append(id_)
+            if id_[0] != 't' or not id_[1:].isdigit() or len(id_[1:]) != 2:
+                messagebox.showerror("Error", f"Line {i}: Invalid ID '{id_}'. Must be in format 'tXX' where XX are two digits.")
+                print(f"Error: Row {i}: Invalid ID '{id_}'. Must be in format 'tXX' where XX are two digits.")
+                return False
         if not padrao_cor.match(cor):
+            messagebox.showerror("Error", f"Line {i}: Invalid color '{cor}'. Must be in #RRGGBB format.")
             print(f"line {i}: invalid color ({cor}).")
             return False
         for campo, nome in [(ingresso, "ingresso"), (duracao, "duracao"), (prioridade, "prioridade")]:
             if not campo.isdigit() or int(campo) < 0:
+                messagebox.showerror("Error", f"Line {i}: Invalid '{nome}' value '{campo}'. Must be a non-negative integer.")
                 print(f"line {i}: field '{nome}' invalid ({campo}).")
                 return False
         # lista_eventos pode ser '-' ou lista separada por vírgulas
         if eventos != "-" and not all(e.strip() for e in eventos.split(",")):
+            messagebox.showerror("Error", f"Line {i}: Invalid event list '{eventos}'.")
             print(f"line {i}: invalid event list ({eventos}).")
             return False
-
+    # Check for duplicate IDs
+    if len(task_ids) != len(set(task_ids)): # set function removes duplicates
+        messagebox.showerror("Error", "Duplicate task IDs found in the table.")
+        print("Error: Duplicate task IDs found in the table.")
+        return False
     print("Valid file")
     return True
 
@@ -230,5 +270,4 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
         return True
 
     else:
-        messagebox.showerror("Error", "Please make sure the table contains only valid data")
         return False

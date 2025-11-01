@@ -68,7 +68,8 @@ def upload_file():
     no_config_button.pack_forget()
     upload_button.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
-    begin_simulation_button.pack(padx=5, pady=5)
+    begin_simulation_button.pack(padx=5, pady=5, side="left")
+    reset_simulation_button.pack(padx=5, pady=5, side="left")
     fu.configure_file(caminho, tree, selected_dropdown, os_quantum_entry)
 
 # Starts simulation from scratch
@@ -78,18 +79,20 @@ def no_config_file():
     #path_label.pack_forget()
     #ath_textbox.pack_forget()
     notebook.pack(expand=True, fill="both", padx=5, pady=5)
-    begin_simulation_button.pack(padx=5, pady=5)
+    begin_simulation_button.pack(padx=5, pady=5, side="left")
+    reset_simulation_button.pack(padx=5, pady=5, side="left")
     fu.configure_file("", tree, selected_dropdown, os_quantum_entry)
 
 # Begins the simulation
 def begin_simulation():
-    notebook.pack_forget()
-    begin_simulation_button.pack_forget()
-    reset_simulation_button.pack(padx=5, pady=5)
     result = fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, selected_dropdown.get(), os_quantum_entry.get())
-    check_task_info_frame.pack(padx=5, pady=5)
-    if not result:
-        reset_simulation()
+    if result:
+        begin_simulation_button.pack_forget()
+        reset_simulation_button.pack_forget()
+        notebook.pack_forget()
+        begin_simulation_button.pack_forget()
+        reset_simulation_button.pack(padx=5, pady=5)
+        check_task_info_frame.pack(padx=5, pady=5)
 
 # Resets all created elements
 def reset_simulation():
@@ -98,6 +101,7 @@ def reset_simulation():
     reset_simulation_button.pack_forget()
     check_task_info_frame.pack_forget()
     notebook.pack_forget()
+    begin_simulation_button.pack_forget()
     task_id_textbox.delete("1.0", tk.END)
     task_color_textbox.delete("1.0", tk.END)
     task_admission_textbox.delete("1.0", tk.END)
@@ -196,7 +200,7 @@ frame_table = ttk.Frame(tasks_tab, width=table_width)
 frame_table.pack(fill=tk.BOTH, expand=True)
 tree = ttk.Treeview(frame_table)
 tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-tree.bind("<Double-1>", edit_cell)
+tree.bind("<Double-1>", edit_cell) # double-clicking on a cell triggers edit_cell function
 scroll_y = ttk.Scrollbar(frame_table, orient=tk.VERTICAL, command=tree.yview)
 scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
 tree.configure(yscrollcommand=scroll_y.set)
