@@ -73,6 +73,7 @@ def configure_file(filename, tree, selected_dropdown, os_quantum_entry):
         selected_dropdown.set("FCFS")
         os_quantum_entry.delete(0, tk.END)
         os_quantum_entry.insert(0, "2")
+        tree.insert("", "end", values=["t01", "#ff0000", "0", "5", "1", "-"])
 
 def validate_table(tree, quantum):
     # Validate quantum
