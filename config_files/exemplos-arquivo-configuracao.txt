@@ -1,3 +1,6 @@
+Modelos de arquivos de configuração
+
+
 algoritmo_escalonamento;quantum
 id;cor;ingresso;duracao;prioridade;lista_eventos
 
