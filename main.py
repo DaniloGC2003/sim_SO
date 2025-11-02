@@ -146,7 +146,7 @@ check_task_info_entry.pack(padx=5, pady=5, side="left")
 check_task_info_button = tk.Button(check_task_info_frame, text = "Check task info", command=check_task_info)
 check_task_info_button.pack(padx=5, pady=5)
 
-# Tools and Filters tabs
+# Config tabs
 notebook = ttk.Notebook(tools_frame)
 
 # General settings tab

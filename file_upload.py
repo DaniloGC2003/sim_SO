@@ -265,7 +265,6 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
 
         # Different behavior based on execution mode
         if simulation_mode.get() == MANUAL_EXECUTION:
-            print("im here")
             chart_button.pack(padx = 5, pady = 5)
         elif simulation_mode.get() == AUTOMATIC_EXECUTION:
             while os_simulator.simulation_finished == False:
