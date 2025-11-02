@@ -231,6 +231,10 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
             os_simulator.tasks.append(task)
             os_simulator.total_simulation_time += int(line[3])
         
+        # sort tasks by name
+        # lambda is a nameless function. t is the input. t.name[1:] is the output.
+        os_simulator.tasks.sort(key=lambda t: t.name[1:])
+
         # Account for gaps between tasks
         earliest_start = None
         for task in os_simulator.tasks:

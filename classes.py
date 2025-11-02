@@ -335,12 +335,14 @@ class Task:
         print(f"Moments in execution: {self.moments_in_execution}, End: {self.end}")
     
     def show_info(self):
+        unique_moments = list(set(self.moments_in_execution))
+        unique_moments.sort(key=int)
         info = f"Task Name: {self.name}\n"
         info += f"Color: {self.color}\n"
         info += f"Start Time: {self.start}\n"
         info += f"Duration: {self.duration}\n"
         info += f"Priority: {self.priority}\n"
         info += f"Event List: {self.event_list}\n"
-        info += f"Moments in Execution: {self.moments_in_execution}\n"
+        info += f"Moments in Execution: {unique_moments}\n"
         info += f"End Time: {self.end}\n"
         messagebox.showinfo("Task Information", info)
