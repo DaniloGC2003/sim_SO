@@ -208,7 +208,7 @@ def validate_file(filename):
     print("Valid file")
     return True
 
-def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, algorithm, quantum):
+def begin_simulation(os_simulator, window, chart_button, step_back_button, simulation_mode, tree, algorithm, quantum):
     print("Beginning simulation.")
     # Make sure data in tables is valid (user might have added invalid data through the GUI)
     if validate_table(tree, quantum):
@@ -267,6 +267,7 @@ def begin_simulation(os_simulator, window, chart_button, simulation_mode, tree, 
         # Different behavior based on execution mode
         if simulation_mode.get() == MANUAL_EXECUTION:
             chart_button.pack(padx = 5, pady = 5)
+            step_back_button.pack(padx = 5, pady = 5)
         elif simulation_mode.get() == AUTOMATIC_EXECUTION:
             while os_simulator.simulation_finished == False:
                 os_simulator.update_chart(chart_button)

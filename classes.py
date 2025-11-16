@@ -222,6 +222,7 @@ class OS_Simulator:
         self.finished_tasks = []
         self.simulation_finished = False
         self.simulation_mode = ""
+        self.simulation_moment = 0
 
     # show messagebox with task data
     def show_task_data(self, task_id):
@@ -247,6 +248,7 @@ class OS_Simulator:
         self.df = None
 
         self.current_time = 0
+        self.simulation_moment = 0
         self.current_task = None
         self.total_simulation_time = 0
         self.finished_tasks = []
@@ -264,8 +266,51 @@ class OS_Simulator:
             print(f"Task: {task.name}, Color: {task.color}, Start: {task.start}, Duration: {task.duration}, Priority: {task.priority}, Events: {task.event_list}")
 
 
-    def update_chart(self, update_chart_button):
+    def plot_chart(self):
+        if self.simulation_mode == MANUAL_EXECUTION or len(self.finished_tasks) == len(self.tasks):
+            self.ax.clear()
+            self.ax.set_xlim(0, max(X_AXIS_MIN_LENGTH, self.simulation_moment + 1))
+            self.ax.set_xticks(range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1))
+            # grid lines
+            for x in range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1):
+                self.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
+            for task in self.tasks:
+                self.ax.barh(task.name, 0, left=0)
+                for i in range(self.simulation_moment):
+                    # if task was executing at time i
+                    if i in task.moments_in_execution:
+                        self.ax.barh(task.name, 1, left=i, color=task.color, edgecolor="black")
+                    # if task was not executing at time i but has started
+                    elif i >= task.start and i < task.end:
+                        self.ax.barh(task.name, 1, left=i, color="white", edgecolor="black")
+            self.canvas.draw()
+
+    def step_forward(self, step_forward_button, step_back_button):
+        print("Stepping forward.")
         print("current time: " + str(self.current_time))
+        print("simulation moment: " + str(self.simulation_moment))
+        if self.current_time == self.simulation_moment:
+            print("At current time. Executing one step.")
+            self.update_chart(step_forward_button, step_back_button)
+        elif self.simulation_moment < self.current_time:
+            print("In the past. Moving forward one step.")
+            self.simulation_moment += 1
+            self.plot_chart()
+        print()
+
+    def step_back(self):
+        print("Stepping back.")
+        print("current time: " + str(self.current_time))
+        print("simulation moment: " + str(self.simulation_moment))
+        if self.simulation_moment == 0:
+            print("Already at time 0, cannot step back.")
+        else:    
+            self.simulation_moment -= 1
+        
+        self.plot_chart()
+        print()
+    
+    def update_chart(self, update_chart_button, step_back_button):
         next_task = self.scheduler.exec(self.tasks, self.current_time)
         if next_task is not None:    
             print("Executing task: ")
@@ -274,6 +319,7 @@ class OS_Simulator:
         # increment time
         if len(self.finished_tasks) < len(self.tasks):
             self.current_time += 1
+            self.simulation_moment += 1
         if next_task is not None:
             # Check if the task just finished
             if hasattr(next_task, "remaining_time"):  # For SRTF or similar algorithms
@@ -285,26 +331,12 @@ class OS_Simulator:
                     next_task.end = self.current_time
                     self.finished_tasks.append(next_task)
     
-        # plot chart
-        if self.simulation_mode == MANUAL_EXECUTION or len(self.finished_tasks) == len(self.tasks):
-            print("simulation mode")
-            self.ax.clear()
-            self.ax.set_xlim(0, max(X_AXIS_MIN_LENGTH, self.current_time + 1))
-            self.ax.set_xticks(range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1))
-            for x in range(int(self.ax.get_xlim()[0]), int(self.ax.get_xlim()[1]) + 1):
-                self.ax.axvline(x=x, color="gray", linestyle=":", linewidth=0.8)
-            for task in self.tasks:
-                self.ax.barh(task.name, 0, left=0)
-                for i in range(self.current_time):
-                    if i in task.moments_in_execution:
-                        self.ax.barh(task.name, 1, left=i, color=task.color, edgecolor="black")
-                    elif i >= task.start and i < task.end:
-                        self.ax.barh(task.name, 1, left=i, color="white", edgecolor="black")
-            self.canvas.draw()
+        self.plot_chart()
 
         # Check if simulation is finished
         if len(self.finished_tasks) == len(self.tasks):
             update_chart_button.pack_forget()
+            step_back_button.pack_forget()
             print("Simulation finished")
             if self.simulation_finished == False:
                 if not os.path.isdir("./image_output"):

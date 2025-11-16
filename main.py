@@ -85,7 +85,7 @@ def no_config_file():
 
 # Begins the simulation
 def begin_simulation():
-    result = fu.begin_simulation(simulator, image_frame, update_chart_button, general_settings_var, tree, selected_dropdown.get(), os_quantum_entry.get())
+    result = fu.begin_simulation(simulator, image_frame, step_forward_button, step_back_button, general_settings_var, tree, selected_dropdown.get(), os_quantum_entry.get())
     if result:
         begin_simulation_button.pack_forget()
         reset_simulation_button.pack_forget()
@@ -97,7 +97,8 @@ def begin_simulation():
 # Resets all created elements
 def reset_simulation():
     simulator.reset()
-    update_chart_button.pack_forget()
+    step_forward_button.pack_forget()
+    step_back_button.pack_forget()
     reset_simulation_button.pack_forget()
     check_task_info_frame.pack_forget()
     notebook.pack_forget()
@@ -132,8 +133,10 @@ no_config_button.pack(padx=5, pady=5)
 begin_simulation_button = tk.Button(tools_frame, text="Begin simulation", 
                           command=begin_simulation)
 reset_simulation_button = tk.Button(tools_frame, text = "Reset simulation", command=reset_simulation)
-update_chart_button = tk.Button(tools_frame, text = "Update chart", 
-                                command=lambda: simulator.update_chart(update_chart_button))
+step_forward_button = tk.Button(tools_frame, text = "Step forward", 
+                                command=lambda: simulator.step_forward(step_forward_button, step_back_button))
+step_back_button = tk.Button(tools_frame, text = "Step back", 
+                             command=lambda: simulator.step_back())
 check_task_info_frame = tk.Frame(tools_frame, bg=GUI_TAB_COLOR)
 check_task_info_label = tk.Label(
     check_task_info_frame,
