@@ -287,7 +287,7 @@ def begin_simulation(os_simulator, window, chart_button, step_back_button, simul
             step_back_button.pack(padx = 5, pady = 5)
         elif simulation_mode.get() == AUTOMATIC_EXECUTION:
             while os_simulator.simulation_finished == False:
-                os_simulator.update_chart(chart_button)
+                os_simulator.step_forward(chart_button, step_back_button)
 
         return True
 
