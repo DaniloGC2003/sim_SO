@@ -5,7 +5,7 @@ import classes as cl
 import sys
 import matplotlib.pyplot as plt
 from utils import *
-
+import os
 
 simulator = cl.OS_Simulator()
 
@@ -55,6 +55,13 @@ def on_close():
     root.destroy()   # Closes Tkinter window
     sys.exit()       # Ensures the Python process stops
 
+# Upload scheduler names dynamically
+def upload_scheduler_module_names():
+    for filename in os.listdir("./"):
+        if filename.startswith("scheduler") and filename.endswith(".py"):
+            name_module = filename[:-3]  # remove ".py"
+            dropwdown["menu"].add_command(label=name_module, command=lambda: selected_dropdown.set(name_module))
+
 # Uploads a config file and fills the table
 def upload_file():
     caminho = filedialog.askopenfilename(
@@ -71,6 +78,7 @@ def upload_file():
     begin_simulation_button.pack(padx=5, pady=5, side="left")
     reset_simulation_button.pack(padx=5, pady=5, side="left")
     fu.configure_file(caminho, tree, selected_dropdown, os_quantum_entry)
+    upload_scheduler_module_names()
 
 # Starts simulation from scratch
 def no_config_file():
@@ -82,6 +90,7 @@ def no_config_file():
     begin_simulation_button.pack(padx=5, pady=5, side="left")
     reset_simulation_button.pack(padx=5, pady=5, side="left")
     fu.configure_file("", tree, selected_dropdown, os_quantum_entry)
+    upload_scheduler_module_names()
 
 # Begins the simulation
 def begin_simulation():
