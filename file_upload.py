@@ -212,13 +212,6 @@ def validate_file(filename):
 
 def begin_simulation(os_simulator, window, chart_button, step_back_button, simulation_mode, tree, algorithm, quantum):
     print("Beginning simulation.")
-    modules = []
-    for filename in os.listdir("./"):
-        if filename.startswith("scheduler") and filename.endswith(".py"):
-            name_module = filename[:-3]  # remove ".py"
-            module = importlib.import_module(name_module)
-            modules.append(module)
-            print(module)
 
     # Make sure data in tables is valid (user might have added invalid data through the GUI)
     if validate_table(tree, quantum):
@@ -252,7 +245,15 @@ def begin_simulation(os_simulator, window, chart_button, step_back_button, simul
             if earliest_start is None or task.start < earliest_start.start:
                 earliest_start = task
         os_simulator.total_simulation_time += earliest_start.start
-        
+        '''
+        modules = {}
+        for filename in os.listdir("./"):
+            if filename.startswith("Scheduler_") and filename.endswith(".py"):
+                name_module = filename[:-3]  # remove ".py"
+                module = importlib.import_module(name_module)
+                modules.update({name_module: module})
+        print(modules)'''
+            
         # create scheduler object
         if os_simulator.algorithm == "FCFS":
             os_simulator.scheduler = cl.Scheduler("FCFS", os_simulator.quantum)
@@ -260,6 +261,12 @@ def begin_simulation(os_simulator, window, chart_button, step_back_button, simul
             os_simulator.scheduler = cl.Scheduler("SRTF", os_simulator.quantum)
         elif os_simulator.algorithm == "PRIO":
             os_simulator.scheduler = cl.Scheduler("PRIO", os_simulator.quantum)
+        else:
+            module = importlib.import_module(os_simulator.algorithm)
+            print("External scheduler init")
+            print(module)
+            os_simulator.scheduler = getattr(module, os_simulator.algorithm)(os_simulator.algorithm,  os_simulator.quantum)
+            print(os_simulator.scheduler)
 
         #plot initial chart
         os_simulator.fig, os_simulator.ax = plt.subplots(figsize=(PLOT_INITIAL_WIDTH,PLOT_INITIAL_HEIGHT))

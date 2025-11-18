@@ -34,7 +34,11 @@ class Scheduler:
             self.current_task = self.step_SRTF(tasks, current_time)
         elif self.algorithm == "PRIO":
             self.current_task = self.step_Priority(tasks, current_time)
+        self.increment_time()
+        return self.current_task
+
         
+    def increment_time(self):
         # Increment quantum timer. Reset if necessary
         self.quantum_timer = self.quantum_timer + 1
         if self.quantum == self.quantum_timer:
@@ -44,7 +48,6 @@ class Scheduler:
         else:
             self.preemption_flag = False
 
-        return self.current_task
     
     def step_FCFS(self, tasks, current_time):
         # Enqueue tasks starting at current_time

@@ -57,8 +57,12 @@ def on_close():
 
 # Upload scheduler names dynamically
 def upload_scheduler_module_names():
+    dropwdown["menu"].delete(0, "end")
+    dropwdown["menu"].add_command(label="FCFS", command=lambda: selected_dropdown.set("FCFS"))
+    dropwdown["menu"].add_command(label="SRTF", command=lambda: selected_dropdown.set("SRTF"))
+    dropwdown["menu"].add_command(label="PRIO", command=lambda: selected_dropdown.set("PRIO"))
     for filename in os.listdir("./"):
-        if filename.startswith("scheduler") and filename.endswith(".py"):
+        if filename.startswith("Scheduler_") and filename.endswith(".py"):
             name_module = filename[:-3]  # remove ".py"
             dropwdown["menu"].add_command(label=name_module, command=lambda: selected_dropdown.set(name_module))
 
