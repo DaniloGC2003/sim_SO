@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from utils import *
 import re
-import importlib
+import importlib.util
+import importlib.machinery
 import os
 
 def edit_cell(event, tree):
@@ -210,6 +211,13 @@ def validate_file(filename):
     print("Valid file")
     return True
 
+def load_external_module(name, path):
+    loader = importlib.machinery.SourceFileLoader(name, path)
+    spec = importlib.util.spec_from_loader(name, loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
 def begin_simulation(os_simulator, window, chart_button, step_back_button, simulation_mode, tree, algorithm, quantum):
     print("Beginning simulation.")
 
@@ -262,10 +270,13 @@ def begin_simulation(os_simulator, window, chart_button, step_back_button, simul
         elif os_simulator.algorithm == "PRIO":
             os_simulator.scheduler = cl.Scheduler("PRIO", os_simulator.quantum)
         else:
-            module = importlib.import_module(os_simulator.algorithm)
+            filename = os_simulator.algorithm + ".py"     # e.g. "Scheduler_FCFSNEW.py"
+            fullpath = os.path.join(".", filename)
+
+            module = load_external_module(os_simulator.algorithm, fullpath)
             print("External scheduler init")
             print(module)
-            os_simulator.scheduler = getattr(module, os_simulator.algorithm)(os_simulator.algorithm,  os_simulator.quantum)
+            os_simulator.scheduler = module.Scheduler_ext(os_simulator.algorithm,  os_simulator.quantum)
             print(os_simulator.scheduler)
 
         #plot initial chart
