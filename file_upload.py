@@ -238,7 +238,30 @@ def begin_simulation(os_simulator, window, chart_button, step_back_button, simul
         # Create task objects
         for line in simulation_lines:
             print('creating new task')
-            task = cl.Task(line[0], line[1], int(line[2]), int(line[3]), int(line[4]), line[5])
+            mutexes = []
+            if line[5] != "-":
+                # parse event list
+                event_list = [e.strip() for e in line[5].split(",")]
+                for event in event_list:
+                    print(f"event: {event}")
+                    # mutex event format ex: ML00:01,MU00:03
+                    if event.startswith("ML"):
+                        match = re.match(r"ML(\d{2}):(\d+)", event)
+                        if match:
+                            mutex_id = int(match.group(1))
+                            requisition_time = int(match.group(2))
+                            mutex_event = cl.TaskMutexEvent(mutex_id, requisition_time, None)
+                            mutexes.append(mutex_event)
+                    elif event.startswith("MU"):
+                        match = re.match(r"MU(\d{2}):(\d+)", event)
+                        if match:
+                            mutex_id = int(match.group(1))
+                            duration = int(match.group(2))
+                            for m in mutexes:
+                                if m.mutex_id == mutex_id and m.duration is None:
+                                    m.duration = duration  
+
+            task = cl.Task(line[0], line[1], int(line[2]), int(line[3]), int(line[4]), mutexes)
             task.print_task()
             os_simulator.tasks.append(task)
             os_simulator.total_simulation_time += int(line[3])

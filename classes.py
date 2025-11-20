@@ -366,7 +366,10 @@ class Task:
         self.end = float('inf')
     
     def print_task(self):
-        print(f"Task: {self.name}, Color: {self.color}, Start: {self.start}, Duration: {self.duration}, Priority: {self.priority}, Events: {self.event_list}")
+        print(f"Task: {self.name}, Color: {self.color}, Start: {self.start}, Duration: {self.duration}, Priority: {self.priority}")
+        print(f"Event list: ", end="")
+        for event in self.event_list:
+            event.print_event()
         print(f"Moments in execution: {self.moments_in_execution}, End: {self.end}")
     
     def show_info(self):
@@ -381,3 +384,11 @@ class Task:
         info += f"Moments in Execution: {unique_moments}\n"
         info += f"End Time: {self.end}\n"
         messagebox.showinfo("Task Information", info)
+
+class TaskMutexEvent:
+    def __init__(self, mutex_id, requisition_time, duration):
+        self.mutex_id = mutex_id
+        self.requisition_time = requisition_time
+        self.duration = duration
+    def print_event(self):
+        print(f"Mutex ID: {self.mutex_id}, Requisition Time: {self.requisition_time}, Duration: {self.duration}")
