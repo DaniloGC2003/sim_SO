@@ -227,6 +227,10 @@ class OS_Simulator:
         self.simulation_mode = ""
         self.simulation_moment = 0
 
+        # Events
+        self.mutexes = []
+
+
     # show messagebox with task data
     def show_task_data(self, task_id):
         for task in self.tasks:
@@ -257,6 +261,8 @@ class OS_Simulator:
         self.finished_tasks = []
         self.simulation_finished = False
         self.simulation_mode = ""
+
+        self.mutexes = []
 
         for t in self.tasks:
             if hasattr(t, "remaining_time"):
@@ -317,6 +323,31 @@ class OS_Simulator:
         next_task = self.scheduler.exec(self.tasks, self.current_time)
         if next_task is not None:    
             print("Executing task: ")
+            for event in next_task.event_list:
+                if isinstance(event, TaskMutexEvent):
+                    if event.mutex_id in [m.mutex_id for m in self.mutexes]:
+                        mutex = None
+                        for mu in self.mutexes:
+                            if mu.mutex_id == event.mutex_id:
+                                mutex = mu
+                        # Check if the task is requesting the mutex at this time
+                        if event.requisition_time == len(next_task.moments_in_execution):
+                            if mutex.locked_by is None:
+                                print(f"Task {next_task.name} acquiring mutex {mutex.mutex_id}")
+                                mutex.locked_by = next_task
+                                mutex.lock_time_remaining = event.duration
+                                mutex.lock_time_remaining -= 1
+                            else:
+                                print(f"Task {next_task.name} waiting for mutex {mutex.mutex_id} (currently locked by {mutex.locked_by.name})")
+                                #return
+                        # Check if the task is done with the mutex
+                        elif mutex.locked_by == next_task:
+                            if mutex.lock_time_remaining > 0:
+                                mutex.lock_time_remaining -= 1
+                                print(f"Task {next_task.name} holding mutex {mutex.mutex_id}, time remaining: {mutex.lock_time_remaining}")
+                            if mutex.lock_time_remaining == 0:
+                                print(f"Task {next_task.name} releasing mutex {mutex.mutex_id}")
+                                mutex.locked_by = None
             next_task.moments_in_execution.append(self.current_time)
             next_task.print_task()
         # increment time
@@ -390,5 +421,11 @@ class TaskMutexEvent:
         self.mutex_id = mutex_id
         self.requisition_time = requisition_time
         self.duration = duration
+        self.lock_time_remaining = duration  # Time remaining for the lock to be released
     def print_event(self):
         print(f"Mutex ID: {self.mutex_id}, Requisition Time: {self.requisition_time}, Duration: {self.duration}")
+    
+class Mutex:
+    def __init__(self, mutex_id):
+        self.mutex_id = mutex_id
+        self.locked_by = None  # Task that currently holds the mutex

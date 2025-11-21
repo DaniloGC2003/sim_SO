@@ -252,6 +252,9 @@ def begin_simulation(os_simulator, window, chart_button, step_back_button, simul
                             requisition_time = int(match.group(2))
                             mutex_event = cl.TaskMutexEvent(mutex_id, requisition_time, None)
                             mutexes.append(mutex_event)
+
+                            if mutex_id not in [m.mutex_id for m in os_simulator.mutexes]:
+                                os_simulator.mutexes.append(cl.Mutex(mutex_id))
                     elif event.startswith("MU"):
                         match = re.match(r"MU(\d{2}):(\d+)", event)
                         if match:
