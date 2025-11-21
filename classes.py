@@ -209,6 +209,7 @@ class OS_Simulator:
         self.algorithm = ""
         self.quantum = 0
         self.tasks = []
+        self.ready_tasks = []
         self.scheduler = None
 
         # Variables used for plotting the chart
@@ -244,6 +245,7 @@ class OS_Simulator:
         self.algorithm = ""
         self.quantum = 0
         self.tasks = []
+        self.ready_tasks = []
         if self.scheduler is not None:
             self.scheduler.reset()
         self.fig = None
@@ -320,7 +322,7 @@ class OS_Simulator:
         print()
     
     def update_chart(self, update_chart_button, step_back_button):
-        next_task = self.scheduler.exec(self.tasks, self.current_time)
+        next_task = self.scheduler.exec(self.ready_tasks, self.current_time)
         if next_task is not None:    
             print("Executing task: ")
             for event in next_task.event_list:
@@ -339,6 +341,8 @@ class OS_Simulator:
                                 mutex.lock_time_remaining -= 1
                             else:
                                 print(f"Task {next_task.name} waiting for mutex {mutex.mutex_id} (currently locked by {mutex.locked_by.name})")
+                                self.ready_tasks.remove(next_task)
+                                mutex.waiting_tasks_queue.put(next_task)
                                 #return
                         # Check if the task is done with the mutex
                         elif mutex.locked_by == next_task:
@@ -348,6 +352,16 @@ class OS_Simulator:
                             if mutex.lock_time_remaining == 0:
                                 print(f"Task {next_task.name} releasing mutex {mutex.mutex_id}")
                                 mutex.locked_by = None
+                                # place one suspended task back in ready list
+                                if not mutex.waiting_tasks_queue.empty():
+                                    waiting_task = mutex.waiting_tasks_queue.get()
+                                    print(f"Task {waiting_task.name} acquiring mutex {mutex.mutex_id} from waiting queue")
+                                    mutex.locked_by = waiting_task
+                                    # Find the corresponding event to set lock_time_remaining
+                                    for ev in waiting_task.event_list:
+                                        if isinstance(ev, TaskMutexEvent) and ev.mutex_id == mutex.mutex_id:
+                                            mutex.lock_time_remaining = ev.duration
+                                    self.ready_tasks.append(waiting_task)
             next_task.moments_in_execution.append(self.current_time)
             next_task.print_task()
         # increment time
@@ -360,10 +374,12 @@ class OS_Simulator:
                 if next_task.remaining_time == 0 and next_task not in self.finished_tasks:
                     next_task.end = self.current_time
                     self.finished_tasks.append(next_task)
+                    self.ready_tasks.remove(next_task)
             else:  # For FCFS or non-preemptive algorithms
                 if len(next_task.moments_in_execution) == next_task.duration:
                     next_task.end = self.current_time
                     self.finished_tasks.append(next_task)
+                    self.ready_tasks.remove(next_task)
     
         self.plot_chart()
 
@@ -429,3 +445,4 @@ class Mutex:
     def __init__(self, mutex_id):
         self.mutex_id = mutex_id
         self.locked_by = None  # Task that currently holds the mutex
+        self.waiting_tasks_queue = q.Queue()
