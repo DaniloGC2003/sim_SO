@@ -267,7 +267,7 @@ def begin_simulation(os_simulator, window, chart_button, step_back_button, simul
             task = cl.Task(line[0], line[1], int(line[2]), int(line[3]), int(line[4]), mutexes)
             task.print_task()
             os_simulator.tasks.append(task)
-            os_simulator.ready_tasks.append(task)
+            #os_simulator.ready_tasks.append(task)
             os_simulator.total_simulation_time += int(line[3])
         
         # sort tasks by name

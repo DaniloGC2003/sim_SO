@@ -29,9 +29,9 @@ class Scheduler:
     def exec(self, tasks, current_time):
         print("scheduler exec")
         if self.algorithm == "FCFS":
-            self.current_task = self.step_FCFS(tasks, current_time)
+            self.current_task = self.step_fcfs(tasks, current_time)
         elif self.algorithm == "SRTF":
-            self.current_task = self.step_SRTF(tasks, current_time)
+            self.current_task = self.step_srtf(tasks, current_time)
         elif self.algorithm == "PRIO":
             self.current_task = self.step_Priority(tasks, current_time)
         self.increment_time()
@@ -98,6 +98,50 @@ class Scheduler:
 
         print('returning: ' + self.current_task.name if self.current_task else "returning None")
         return self.current_task
+    
+    def step_fcfs(self, tasks, current_time):
+        print("fcfs step")
+        print("Ready tasks:")
+        for t in tasks:
+            print(t.name)
+        if not self.preemption_flag:
+            print("no preemption")
+            if self.current_task is not None:
+                print(f"current task: {self.current_task.name}")
+                if self.current_task.end != float('inf'): # if finished
+                    print(f"task {self.current_task.name} finished")
+                    self.quantum_timer = 0
+            self.current_task = tasks[0] if tasks else None
+            return self.current_task
+        else:
+            print("preemption")
+            if len(tasks) == 0:
+                return None
+            if self.current_task is not None:
+                print(f"current task: {self.current_task.name}")
+            if self.current_task.end == float('inf'): # if not finished
+                # Rotate the list to simulate FCFS with preemption
+                old_task = tasks.pop(0)
+                print(f"old task: {old_task.name}")
+                print(f"preempting task: {old_task.name}")
+                tasks.append(old_task)
+                self.current_task = tasks[0]
+                return self.current_task if tasks else None
+            else: #task finished, such that it is no longer in the ready queue
+                print(f"task {self.current_task.name} finished")
+                self.quantum_timer = 0
+                self.current_task = tasks[0]
+                return self.current_task if tasks else None
+            '''if self.current_task.end == float('inf'): # if not finished
+                # Rotate the list to simulate FCFS with preemption
+                old_task = tasks.pop(0)
+                print(f"old task: {old_task.name}")
+                print(f"preempting task: {old_task.name}")
+                tasks.append(old_task)
+                return tasks[0] if tasks else None
+            else: #task finished, such that it is no longer in the ready queue
+                print(f"task {old_task.name} finished")
+                return tasks[0] if tasks else None'''
 
     def step_SRTF(self, tasks, current_time):
         # Initialize remaining_time for new tasks if not already done
@@ -148,12 +192,31 @@ class Scheduler:
             self.current_task.remaining_time -= 1
             if self.current_task.remaining_time == 0:
                 self.current_task.end = current_time + 1
-                print(f"Task {self.current_task.name} finished at time {self.current_task.end}")
+                print(f"Task {self.current_task.name} to finish at time {self.current_task.end + 1}")
 
         print(f"SRTF selected - running: {self.current_task.name if self.current_task else 'None'}")
         return self.current_task
     
+    def step_srtf(self, tasks, current_time):
+        print("srtf step")
+        print("Ready tasks:")
+        for t in tasks:
+            print(t.name)
+        srtf_list = tasks.copy()
+        srtf_list.sort(key=lambda t: t.duration - len(t.moments_in_execution))
+        return srtf_list[0] if srtf_list else None
+
+    def step_PRIO(self, tasks, current_time):
+        print("prio step")
+        print("Ready tasks:")
+        for t in tasks:
+            print(t.name)
+        prio_list = tasks.copy()
+        prio_list.sort(key=lambda t: t.priority, reverse=True)
+        return prio_list[0] if prio_list else None
+
     def step_Priority(self, tasks, current_time):
+
         # Add newly arrived tasks
         for t in tasks:
             if t.start == current_time:
@@ -166,6 +229,11 @@ class Scheduler:
         ready_list = []
         while not self.execution_queue.empty():
             ready_list.append(self.execution_queue.get())
+        # Remove tasks which might have been suspended
+        for t in ready_list:
+            if t not in tasks:
+                print(f"Removing suspended task from ready list: {t.name}")
+                ready_list.remove(t)
 
         # Reinsert current task if still running and not finished
         if self.current_task is not None and self.current_task.end == float('inf') and self.current_task not in ready_list:
@@ -194,12 +262,12 @@ class Scheduler:
 
         # Execute 1 time unit
         if self.current_task is not None:
-            self.current_task.moments_in_execution.append(current_time)
+            #self.current_task.moments_in_execution.append(current_time)
             self.current_task.remaining_time -= 1
 
             if self.current_task.remaining_time <= 0:
                 self.current_task.end = current_time + 1
-                print(f"Task {self.current_task.name} finished at time {self.current_task.end}")
+                print(f"Task {self.current_task.name} to finish at time {self.current_task.end + 1}")
 
         print(f"PRIORITY selected - running: {self.current_task.name if self.current_task else 'None'}")
         return self.current_task
@@ -322,6 +390,13 @@ class OS_Simulator:
         print()
     
     def update_chart(self, update_chart_button, step_back_button):
+        for t in self.tasks:
+            if t.start == self.current_time and t not in self.ready_tasks and t not in self.finished_tasks:
+                print(f"Adding task {t.name} to ready tasks")
+                self.ready_tasks.append(t)
+        print("Ready tasks at time " + str(self.current_time) + ":")
+        for t in self.ready_tasks:
+            print(t.name)
         next_task = self.scheduler.exec(self.ready_tasks, self.current_time)
         if next_task is not None:    
             print("Executing task: ")
@@ -339,11 +414,13 @@ class OS_Simulator:
                                 mutex.locked_by = next_task
                                 mutex.lock_time_remaining = event.duration
                                 mutex.lock_time_remaining -= 1
+                                print(f"mutex time remaining: {mutex.lock_time_remaining}")
                             else:
                                 print(f"Task {next_task.name} waiting for mutex {mutex.mutex_id} (currently locked by {mutex.locked_by.name})")
                                 self.ready_tasks.remove(next_task)
                                 mutex.waiting_tasks_queue.put(next_task)
-                                #return
+                                self.update_chart(update_chart_button, step_back_button)
+                                return
                         # Check if the task is done with the mutex
                         elif mutex.locked_by == next_task:
                             if mutex.lock_time_remaining > 0:
@@ -377,6 +454,7 @@ class OS_Simulator:
                     self.ready_tasks.remove(next_task)
             else:  # For FCFS or non-preemptive algorithms
                 if len(next_task.moments_in_execution) == next_task.duration:
+                    print("TASK" + next_task.name + "FINISHED")
                     next_task.end = self.current_time
                     self.finished_tasks.append(next_task)
                     self.ready_tasks.remove(next_task)
