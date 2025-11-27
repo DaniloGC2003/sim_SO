@@ -33,7 +33,7 @@ class Scheduler:
         elif self.algorithm == "SRTF":
             self.current_task = self.step_srtf(tasks, current_time)
         elif self.algorithm == "PRIO":
-            self.current_task = self.step_Priority(tasks, current_time)
+            self.current_task = self.step_PRIO(tasks, current_time)
         self.increment_time()
         return self.current_task
 
@@ -409,7 +409,7 @@ class OS_Simulator:
                                 mutex = mu
                         # Check if the task is requesting the mutex at this time
                         if event.requisition_time == len(next_task.moments_in_execution):
-                            if mutex.locked_by is None:
+                            if mutex.locked_by is None or mutex.locked_by == next_task:
                                 print(f"Task {next_task.name} acquiring mutex {mutex.mutex_id}")
                                 mutex.locked_by = next_task
                                 mutex.lock_time_remaining = event.duration
