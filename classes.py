@@ -418,6 +418,7 @@ class OS_Simulator:
                             else:
                                 print(f"Task {next_task.name} waiting for mutex {mutex.mutex_id} (currently locked by {mutex.locked_by.name})")
                                 self.ready_tasks.remove(next_task)
+                                self.scheduler.quantum_timer = 0
                                 mutex.waiting_tasks_queue.put(next_task)
                                 self.update_chart(update_chart_button, step_back_button)
                                 return
